@@ -1,8 +1,15 @@
 #!/usr/bin/python
+#
+# Command-line access to the base implementation of git-it.
+#
 import sys
+import getopt
+
+def printerr(msg):
+  sys.stderr.write('%s\n' % msg)
 
 def usage():
-  print 'usage: it [<subcommand> [<options>]]'
+  print 'usage: it <subcommand> [<options>]'
   print ''
   print 'Valid subcommands are:'
   print 'list      Shows a list of all issues.'
@@ -14,4 +21,36 @@ def usage():
   print 'close     Closes an issue.'
   print 'reject    Rejects an issue.'
 
-usage()
+# Parse input options
+opts = []
+params = []
+try:
+  shorts = 'h'
+  longs  = [ ]
+  opts, params = getopt.getopt(sys.argv[1:], shorts, longs)
+except getopt.GetoptError, e:
+  printerr(e)
+  usage()
+  sys.exit(1)
+
+# Set variables according to input options
+for key, val in opts:
+  if key in [ '-h' ]:
+    usage()
+    sys.exit(0)
+
+# No subcommand?
+if len(params) == 0:
+  printerr('No subcommand specified.')
+  usage()
+  sys.exit(1)
+
+# Valid subcommand?
+subcmd = params[0]
+if not subcmd in [ 'list', 'show', 'new', 'open', 'close', 'reject' ]:
+  printerr('Unknown subcommand \'%s\'.' % subcmd)
+  usage()
+  sys.exit(1)
+
+# Main logic
+print 'TODO: %s' % subcmd
