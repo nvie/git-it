@@ -4,6 +4,7 @@
 #
 import sys
 import getopt
+import gitit
 
 def printerr(msg):
   sys.stderr.write('%s\n' % msg)
@@ -53,4 +54,6 @@ if not subcmd in [ 'list', 'show', 'new', 'open', 'close', 'reject' ]:
   sys.exit(1)
 
 # Main logic
-print 'TODO: %s' % subcmd
+g = gitit.Gitit()
+if subcmd == 'new':
+  print g.new()
