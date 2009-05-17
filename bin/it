@@ -57,3 +57,7 @@ if not subcmd in [ 'list', 'show', 'new', 'open', 'close', 'reject' ]:
 g = gitit.Gitit()
 if subcmd == 'new':
   print g.new()
+elif subcmd == 'list':
+  tickets = g.list()
+  for lineno, ticket in enumerate(tickets):
+    print ticket.oneline(lineno + 1)
