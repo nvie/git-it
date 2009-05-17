@@ -1,0 +1,11 @@
+#!/usr/bin/python
+import sys
+
+def usage():
+  print 'usage: it [<subcommand> [<options>]]'
+  print ''
+  print 'Valid subcommands are:'
+  print 'list      Shows a list of all issues.'
+  print 'show      Shows a list of all issues.'
+
+usage()
