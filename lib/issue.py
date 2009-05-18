@@ -1,5 +1,12 @@
+import os
 import datetime
 import customio
+
+def chop(s, maxlen = 20, suffix = ''):
+  if len(s) > maxlen:
+    return s[:maxlen-len(suffix)] + suffix
+  else:
+    return s
 
 class Issue:
   def __init__(self, ticket_file = None):
@@ -15,24 +22,33 @@ class Issue:
 
     # Now, read the ticket file if given
     if ticket_file is not None:
-      ticket = file_as_dict(ticket_file)
+      ticket = customio.file_as_dict(ticket_file)
       self.title = ticket['Subject']
       self.type = ticket['Type']
       self.issuer = ticket['Issuer']
-      self.date = ticket['Date']
+      # TODO: Implement
+      #self.date = ticket['Date']
+      self.date = datetime.datetime.now()
       self.body = ''
       self.prio = ticket['Priority']
-      self.id = ticket_file
       self.status = ticket['Status']
       self.assigned_to = ticket['Assigned to']
+      _, self.id = os.path.split(ticket_file)
 
   def oneline(self, lineno = None):
-    curr = '*'
-    if lineno:
-      id = lineno
-    else:
-      id = '?'
-    return '%s %4s %-30s %-8s %-6s %-16s' % (curr, id, self.title, self.status, self.date, self.assigned_to)
+    date = '%s/%s' % (self.date.month, self.date.day)
+    return '%-7s %-7s %-30s %-8s %-6s %-16s' % (chop(self.id, 7), chop(self.type, 7), chop(self.title, 30, '..'), chop(self.status, 8), date, chop(self.assigned_to, 16, '..'))
 
   def __str__(self):
-    return self.oneline()
+    headers = [ 'Subject: %s'     % self.title,
+                'Issuer: %s'      % self.issuer,
+                'Date: %s'        % self.date,
+                'Type: %s'        % self.type,
+                'Priority: %s'    % self.prio,
+                'Status: %s'      % self.status,
+                'Assigned to: %s' % self.status,
+                '',
+                self.body
+              ]
+    return os.linesep.join(headers)
+

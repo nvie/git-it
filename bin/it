@@ -60,8 +60,6 @@ g = gitit.Gitit()
 if subcmd == 'init':
   g.init()
 elif subcmd == 'new':
-  print g.new()
+  g.new()
 elif subcmd == 'list':
-  tickets = g.list()
-  for lineno, ticket in enumerate(tickets):
-    print ticket.oneline(lineno + 1)
+  g.list()
