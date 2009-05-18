@@ -1,3 +1,6 @@
 Git-it is an issue tracker, using a specific branch in a Git repository to
 keep a managed list of issues, bugs, features or tasks in sync with co-
 developers.
+
+Authors:
+Vincent Driessen <vincent@datafox.nl>
