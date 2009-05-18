@@ -1,5 +1,11 @@
 import os, errno
 
+def chop(s, maxlen = 20, suffix = ''):
+  if len(s) > maxlen:
+    return s[:maxlen-len(suffix)] + suffix
+  else:
+    return s
+
 # Shamelessly borrowed from The Python Cookbook
 def mkdirs(newdir, mode=0777):
   try:

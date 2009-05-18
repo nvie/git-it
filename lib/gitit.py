@@ -1,7 +1,7 @@
 import sys, os, dircache
 import datetime
 import sha
-import customio, customstr, repo, log, issue
+import misc, repo, log, issue
 
 class Gitit:
   def __init__(self):
@@ -18,11 +18,11 @@ class Gitit:
     if not gitrepo:
       log.printerr('Not a valid Git repository.')
     else:
-      #customio.mkdirs(os.path.abspath(gitrepo + '/..') + '/.it/tickets')
+      #misc.mkdirs(os.path.abspath(gitrepo + '/..') + '/.it/tickets')
       parent, _ = os.path.split(gitrepo)
       itdir = os.path.join(parent, '.it')
-      customio.mkdirs(os.path.join(itdir, 'tickets'))
-      customio.mkdirs(os.path.join(itdir, 'tmp'))
+      misc.mkdirs(os.path.join(itdir, 'tickets'))
+      misc.mkdirs(os.path.join(itdir, 'tmp'))
       print 'Initialized empty issue database in \'.it\''
 
   def edit(self, sha):
@@ -42,10 +42,10 @@ class Gitit:
         log.printerr('- %s' % match)
     else:
       if os.system('vim "%s"' % (os.path.join(ticketdir, matches[0]))) == 0:
-        print 'ticket \'%s\' edited succesfully' % customstr.chop(matches[0], 7)
+        print 'ticket \'%s\' edited succesfully' % misc.chop(matches[0], 7)
         self.list()
       else:
-        log.printerr('editing of ticket \'%s\' failed' % customstr.chop(matches[0], 7))
+        log.printerr('editing of ticket \'%s\' failed' % misc.chop(matches[0], 7))
 
   def show(self, sha):
     itdb = repo.find_itdb()

@@ -1,8 +1,7 @@
 import os
 import datetime
-import customio
 import colors
-from customstr import chop
+import misc
 
 class Issue:
   def __init__(self, ticket_file = None):
@@ -18,7 +17,7 @@ class Issue:
 
     # Now, read the ticket file if given
     if ticket_file is not None:
-      ticket = customio.file_as_dict(ticket_file)
+      ticket = misc.file_as_dict(ticket_file)
       self.title = ticket['Subject']
       self.type = ticket['Type']
       self.issuer = ticket['Issuer']
@@ -34,12 +33,12 @@ class Issue:
   def oneline(self, lineno = None):
     status_colors = { 'open' : 'bold', 'closed' : 'default', 'rejected' : 'red-on-white', 'fixed' : 'green-on-white' }
     date = '%s/%s' % (self.date.month, self.date.day)
-    subject = '%s%-35s%s' % (colors.colors[status_colors[self.status]], chop(self.title, 30, '..'), colors.colors['default'])
-    status = '%s%-8s%s' % (colors.colors[status_colors[self.status]], chop(self.status, 8), colors.colors['default'])
+    subject = '%s%-35s%s' % (colors.colors[status_colors[self.status]], misc.chop(self.title, 30, '..'), colors.colors['default'])
+    status = '%s%-8s%s' % (colors.colors[status_colors[self.status]], misc.chop(self.status, 8), colors.colors['default'])
     return '%-7s %-7s %s %s %-6s %-16s' % \
-           (chop(self.id, 7),
-            chop(self.type, 7), subject, status,
-            date, chop(self.assigned_to, 16, '..'))
+           (misc.chop(self.id, 7),
+            misc.chop(self.type, 7), subject, status,
+            date, misc.chop(self.assigned_to, 16, '..'))
 
   def __str__(self):
     headers = [ 'Subject: %s'     % self.title,
