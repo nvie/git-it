@@ -20,6 +20,7 @@ def usage():
   print '  new       Adds a new issue.'
   print '  edit      Edits an existing issue.'
   print '  rm -f     Removes an existing ticket.'
+  print '  mv        Moves the given ticket to a release.'
   print ''
   print 'Changing status:'
   print '  open      Opens an issue.'
@@ -53,7 +54,7 @@ if len(params) == 0:
 # Valid subcommand?
 subcmd = params[0]
 del params[0]
-if not subcmd in [ 'init', 'list', 'show', 'new', 'edit', 'rm', 'open', 'close', 'reject' ]:
+if not subcmd in [ 'init', 'list', 'show', 'new', 'edit', 'mv', 'rm', 'open', 'close', 'reject' ]:
   log.printerr('Unknown subcommand \'%s\'.' % subcmd)
   usage()
   sys.exit(1)
@@ -76,6 +77,11 @@ elif subcmd == 'show':
     log.printerr('usage: it show <id>')
     sys.exit(1)
   g.show(params[0])
+elif subcmd == 'mv':
+  if len(params) != 2:
+    log.printerr('usage: it mv <id> <release>')
+    sys.exit(1)
+  g.mv(params[0], params[1])
 elif subcmd == 'rm':
   if len(params) != 2 or params[0] != '-f':
     log.printerr('usage: it rm -f <id>')

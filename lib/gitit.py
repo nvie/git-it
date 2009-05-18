@@ -62,6 +62,26 @@ class Gitit:
     else:
       log.printerr('editing of ticket \'%s\' failed' % sha7)
 
+  def mv(self, sha, to_rel):
+    match = self.match_or_error(sha)
+    src_rel, basename = os.path.split(match)
+    sha7 = misc.chop(basename, 7)
+    to_rel_abs = os.path.abspath(os.path.join(src_rel, '..', to_rel))
+    if not os.path.isdir(to_rel_abs):
+      log.printerr('no such release \'%s\'' % to_rel)
+      return
+    if to_rel_abs == src_rel:
+      log.printerr('ticket \'%s\' already in \'%s\'' % (sha7, to_rel))
+      return
+
+    try:
+      os.rename(match, os.path.join(to_rel_abs, basename))
+      print 'ticket \'%s\' moved to release \'%s\'' % (sha7, to_rel)
+      self.list()
+    except OSError, e:
+      log.printerr('could not move ticket \'%s\' to \'%s\':' % (sha7, to_rel))
+      log.printerr(e)
+
   def show(self, sha):
     match = self.match_or_error(sha)
     i = issue.Issue(match)
