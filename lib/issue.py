@@ -47,7 +47,7 @@ class Issue:
                 'Type: %s'        % self.type,
                 'Priority: %s'    % self.prio,
                 'Status: %s'      % self.status,
-                'Assigned to: %s' % self.status,
+                'Assigned to: %s' % self.assigned_to,
                 '',
                 self.body
               ]
