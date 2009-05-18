@@ -1,7 +1,7 @@
 import sys, os, dircache
 import datetime
 import sha
-import customio, repo, log, issue
+import customio, customstr, repo, log, issue
 
 class Gitit:
   def __init__(self):
@@ -68,8 +68,8 @@ class Gitit:
     list = dircache.listdir(ticketdir)
     list = [ issue.Issue(os.path.join(ticketdir, x)) for x in list ]
     if len(list) > 0:
-      print '     id type    title                          status   date   assigned-to'
-      print '------- ------- ------------------------------ -------- ------ ----------------'
+      print 'id      type    title                               status   date   assigned-to'
+      print '------- ------- ----------------------------------- -------- ------ ----------------'
       for lineno, ticket in enumerate(list):
         print ticket.oneline(lineno + 1)
     else:

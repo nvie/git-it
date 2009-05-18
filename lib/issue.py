@@ -1,12 +1,8 @@
 import os
 import datetime
 import customio
-
-def chop(s, maxlen = 20, suffix = ''):
-  if len(s) > maxlen:
-    return s[:maxlen-len(suffix)] + suffix
-  else:
-    return s
+import colors
+from customstr import chop
 
 class Issue:
   def __init__(self, ticket_file = None):
@@ -36,8 +32,14 @@ class Issue:
       _, self.id = os.path.split(ticket_file)
 
   def oneline(self, lineno = None):
+    status_colors = { 'open' : 'bold', 'closed' : 'default', 'rejected' : 'red-on-white', 'fixed' : 'green-on-white' }
     date = '%s/%s' % (self.date.month, self.date.day)
-    return '%-7s %-7s %-30s %-8s %-6s %-16s' % (chop(self.id, 7), chop(self.type, 7), chop(self.title, 30, '..'), chop(self.status, 8), date, chop(self.assigned_to, 16, '..'))
+    subject = '%s%-35s%s' % (colors.colors[status_colors[self.status]], chop(self.title, 30, '..'), colors.colors['default'])
+    status = '%s%-8s%s' % (colors.colors[status_colors[self.status]], chop(self.status, 8), colors.colors['default'])
+    return '%-7s %-7s %s %s %-6s %-16s' % \
+           (chop(self.id, 7),
+            chop(self.type, 7), subject, status,
+            date, chop(self.assigned_to, 16, '..'))
 
   def __str__(self):
     headers = [ 'Subject: %s'     % self.title,
