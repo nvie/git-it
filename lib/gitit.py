@@ -18,52 +18,46 @@ class Gitit:
     if not gitrepo:
       log.printerr('Not a valid Git repository.')
     else:
-      #misc.mkdirs(os.path.abspath(gitrepo + '/..') + '/.it/tickets')
       parent, _ = os.path.split(gitrepo)
       itdir = os.path.join(parent, '.it')
       misc.mkdirs(os.path.join(itdir, 'tickets'))
       misc.mkdirs(os.path.join(itdir, 'tmp'))
       print 'Initialized empty issue database in \'.it\''
 
-  def edit(self, sha):
+  def match_or_error(self, sha):
     itdb = repo.find_itdb()
     if not itdb:
       log.printerr('Issue database not yet initialized')
       log.printerr('Run \'it init\' to initialize now')
       return
+
     ticketdir = os.path.join(itdb, 'tickets')
     files = dircache.listdir(ticketdir)
     matches = filter(lambda x: x.startswith(sha), files)
     if len(matches) == 0:
       log.printerr('no matching ticket')
+      sys.exit(1)
     elif len(matches) > 1:
       log.printerr('ambiguous match critiria. the following tickets match:')
       for match in matches:
         log.printerr('- %s' % match)
+      sys.exit(1)
     else:
-      if os.system('vim "%s"' % (os.path.join(ticketdir, matches[0]))) == 0:
-        print 'ticket \'%s\' edited succesfully' % misc.chop(matches[0], 7)
-        self.list()
-      else:
-        log.printerr('editing of ticket \'%s\' failed' % misc.chop(matches[0], 7))
+      return os.path.join(ticketdir, matches[0])
+
+  def edit(self, sha):
+    match = self.match_or_error(sha)
+    _, basename = os.path.split(match)
+    sha7 = misc.chop(basename, 7)
+    if os.system('vim "%s"' % match) == 0:
+      print 'ticket \'%s\' edited succesfully' % sha7
+      self.list()
+    else:
+      log.printerr('editing of ticket \'%s\' failed' % sha7)
 
   def show(self, sha):
-    itdb = repo.find_itdb()
-    if not itdb:
-      log.printerr('Issue database not yet initialized')
-      log.printerr('Run \'it init\' to initialize now')
-      return
-    ticketdir = os.path.join(itdb, 'tickets')
-    files = dircache.listdir(ticketdir)
-    matches = filter(lambda x: x.startswith(sha), files)
-    if len(matches) == 0:
-      log.printerr('no matching ticket')
-    elif len(matches) > 1:
-      log.printerr('ambiguous match critiria. the following tickets match:')
-      for match in matches:
-        log.printerr('- %s' % match)
-    else:
-      os.system('cat "%s"' % (os.path.join(ticketdir, matches[0])))
+    match = self.match_or_error(sha)
+    os.system('cat "%s"' % match)
 
   def new(self):
     i = issue.Issue()
