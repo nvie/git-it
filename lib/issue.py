@@ -1,19 +1,5 @@
 import datetime
-
-def file_as_dict(filename):
-  f = open(filename, 'r')
-  dict = {}
-  try:
-    lines = f.read().split('\n')
-    for line in lines:
-      pos = line.find(':')
-      if pos >= 0:
-        key = line[:pos].strip()
-        val = line[pos+1:].strip()
-        dict[key] = val
-  finally:
-    f.close()
-  return dict
+import customio
 
 class Issue:
   def __init__(self, ticket_file = None):
