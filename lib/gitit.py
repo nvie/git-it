@@ -47,6 +47,24 @@ class Gitit:
       else:
         log.printerr('editing of ticket \'%s\' failed' % customstr.chop(matches[0], 7))
 
+  def show(self, sha):
+    itdb = repo.find_itdb()
+    if not itdb:
+      log.printerr('Issue database not yet initialized')
+      log.printerr('Run \'it init\' to initialize now')
+      return
+    ticketdir = os.path.join(itdb, 'tickets')
+    files = dircache.listdir(ticketdir)
+    matches = filter(lambda x: x.startswith(sha), files)
+    if len(matches) == 0:
+      log.printerr('no matching ticket')
+    elif len(matches) > 1:
+      log.printerr('ambiguous match critiria. the following tickets match:')
+      for match in matches:
+        log.printerr('- %s' % match)
+    else:
+      os.system('cat "%s"' % (os.path.join(ticketdir, matches[0])))
+
   def new(self):
     i = issue.Issue()
 

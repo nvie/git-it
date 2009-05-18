@@ -70,3 +70,8 @@ elif subcmd == 'edit':
     log.printerr('usage: it edit <id>')
     sys.exit(1)
   g.edit(params[0])
+elif subcmd == 'show':
+  if len(params) != 1:
+    log.printerr('usage: it show <id>')
+    sys.exit(1)
+  g.show(params[0])
