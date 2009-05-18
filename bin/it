@@ -16,14 +16,14 @@ def usage():
   print 'usage: it <subcommand> [<options>]'
   print ''
   print 'Valid subcommands are:'
-  print 'list      Shows a list of all issues.'
-  print 'show      Shows details of a specific issue.'
-  print 'new       Adds a new issue.'
+  print '  list      Shows a list of all issues.'
+  print '  show      Shows details of a specific issue.'
+  print '  new       Adds a new issue.'
   print ''
   print 'Changing status:'
-  print 'open      Opens an issue.'
-  print 'close     Closes an issue.'
-  print 'reject    Rejects an issue.'
+  print '  open      Opens an issue.'
+  print '  close     Closes an issue.'
+  print '  reject    Rejects an issue.'
 
 # Parse input options
 opts = []
