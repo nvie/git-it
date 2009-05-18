@@ -115,3 +115,13 @@ class Gitit:
     else:
       print 'no issues'
 
+  def rm(self, sha):
+    match = self.match_or_error(sha)
+    _, basename = os.path.split(match)
+    sha7 = misc.chop(basename, 7)
+    if os.system('rm "%s"' % match) == 0:
+      print 'ticket \'%s\' removed'% sha7
+    else:
+      log.printerr('error removing ticket \'%s\'' % sha7)
+      sys.exit(1)
+
