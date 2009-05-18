@@ -32,8 +32,15 @@ class Gitit:
       return
 
     ticketdir = os.path.join(itdb, 'tickets')
-    files = dircache.listdir(ticketdir)
-    matches = filter(lambda x: x.startswith(sha), files)
+    releases = dircache.listdir(ticketdir)
+    matches = []
+    for rel in releases:
+      reldir = os.path.join(ticketdir, rel)
+      files = dircache.listdir(reldir)
+      for file in files:
+        if file.startswith(sha):
+          matches.append(os.path.join(reldir, file))
+
     if len(matches) == 0:
       log.printerr('no matching ticket')
       sys.exit(1)
@@ -57,7 +64,8 @@ class Gitit:
 
   def show(self, sha):
     match = self.match_or_error(sha)
-    os.system('cat "%s"' % match)
+    i = issue.Issue(match)
+    print i.__str__()
 
   def new(self):
     i = issue.Issue()
@@ -98,6 +106,12 @@ class Gitit:
     finally:
       f.close
 
+  def progress_bar(self, percentage_done, width = 32):
+    blocks_done = int(percentage_done * 1.0 * width)
+    format_string_done = ('%%-%ds' % blocks_done) % ''
+    format_string_togo = ('%%-%ds' % (width - blocks_done)) % ''
+    return '[' + colors.colors['green'] + format_string_done + colors.colors['default'] + format_string_togo + '] %d%%' % int(percentage_done * 100)
+
   def list(self):
     itdb = repo.find_itdb()
     if not itdb:
@@ -110,8 +124,9 @@ class Gitit:
       fullreleasedir = os.path.join(ticketdir, releasedir)
       ticketfiles = dircache.listdir(fullreleasedir)
       tickets = [ issue.Issue(os.path.join(fullreleasedir, t)) for t in ticketfiles ]
-      print colors.colors['red-on-white'] + '%-16s' % releasedir + colors.colors['default'] + \
-            '[' + colors.colors['green'] + '                   ' + colors.colors['default'] + '            ] 75%'
+      total = len(tickets) * 1.0
+      done = len(filter(lambda x: x.status != 'open', tickets)) * 1.0
+      print colors.colors['red-on-white'] + '%-16s' % releasedir + colors.colors['default'] + self.progress_bar(done / total)
       if len(tickets) > 0:
         print colors.colors['blue-on-white'] + 'id      type    title                                                                  status   date   assigned-to' + colors.colors['default']
         #TODO: in case of no color support, we should print a line instead

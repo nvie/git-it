@@ -14,6 +14,7 @@ class Issue:
     self.id = '000000'
     self.status = 'open'
     self.assigned_to = '-'
+    self.release = 'uncategorized'
 
     # Now, read the ticket file if given
     if ticket_file is not None:
@@ -28,7 +29,8 @@ class Issue:
       self.prio = ticket['Priority']
       self.status = ticket['Status']
       self.assigned_to = ticket['Assigned to']
-      _, self.id = os.path.split(ticket_file)
+      dir, self.id = os.path.split(ticket_file)
+      _, self.release = os.path.split(dir)
 
   def oneline(self, lineno = None):
     status_colors = { 'open' : 'bold', 'closed' : 'default', 'rejected' : 'red-on-white', 'fixed' : 'green-on-white' }
@@ -48,6 +50,7 @@ class Issue:
                 'Priority: %s'    % self.prio,
                 'Status: %s'      % self.status,
                 'Assigned to: %s' % self.assigned_to,
+                'Release: %s'     % self.release,
                 '',
                 self.body
               ]
