@@ -4,6 +4,9 @@
 #
 import sys
 import getopt
+
+# Point Python to the lib directory to include libraries
+sys.path += [ sys.path[0] + '/../lib' ]
 import gitit
 
 def printerr(msg):
