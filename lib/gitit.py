@@ -68,43 +68,25 @@ class Gitit:
     print i.__str__()
 
   def new(self):
-    i = issue.Issue()
-    i.issuer = '%s <%s>' % (os.popen('git config user.name').read().strip(), os.popen('git config user.email').read().strip())
+    i = issue.create_interactive()
 
     # Create a new temporary file to edit a new ticket
     itdb = repo.find_itdb()
-    workfile = os.path.join(itdb, 'tmp', 'new_ticket')
-    self.store_ticket(i.__str__(), workfile)
 
-    # Has editing taken place?
-    timestamp1 = os.path.getmtime(workfile)
-    if os.system('vim "%s"' % workfile) != 0:
-      log.printerr('editing failed')
-      return
-    timestamp2 = os.path.getmtime(workfile)
-    if timestamp2 <= timestamp1:
-      log.printerr('editing cancelled. no new ticket added.')
-      return
-
-    # TODO: Add a check here to see whether all info is filled in correctly!
-    i = issue.Issue(workfile)
-
+    # Generate a SHA1 id
     s = sha.new()
     s.update(i.__str__())
     s.update(os.getlogin())
     s.update(datetime.datetime.now().__str__())
-    filename = os.path.join(itdb, 'tickets', s.hexdigest())
-    self.store_ticket(i.__str__(), filename)
-    #os.system('git add "%s"' % itdb)
-    #os.system('git commit -m "added ticket \'%s\'" "%s"' % (i.title, itdb))
-    return i
+    i.id = s.hexdigest()
 
-  def store_ticket(self, ticket_content, filename):
-    f = open(filename, 'w')
-    try:
-      f.write(ticket_content)
-    finally:
-      f.close
+    # Save the ticket to disk
+    i.save()
+    _, ticketname = os.path.split(i.filename())
+    sha7 = misc.chop(ticketname, 7)
+    print 'new ticket \'%s\' saved' % sha7
+    print 'new ticket \'%s\' saved' % i.filename()
+    return i
 
   def progress_bar(self, percentage_done, width = 32):
     blocks_done = int(percentage_done * 1.0 * width)
@@ -124,18 +106,26 @@ class Gitit:
       fullreleasedir = os.path.join(ticketdir, releasedir)
       ticketfiles = dircache.listdir(fullreleasedir)
       tickets = [ issue.Issue(os.path.join(fullreleasedir, t)) for t in ticketfiles ]
+
       total = len(tickets) * 1.0
       done = len(filter(lambda x: x.status != 'open', tickets)) * 1.0
-      print colors.colors['red-on-white'] + '%-16s' % releasedir + colors.colors['default'] + self.progress_bar(done / total)
+      release_line = colors.colors['red-on-white'] + '%-16s' % releasedir + colors.colors['default']
+
+      # Show a progress bar only when there are items in this release
+      if total > 0:
+        print release_line + self.progress_bar(done / total)
+      else:
+        print release_line
+
       if len(tickets) > 0:
-        print colors.colors['blue-on-white'] + 'id      type    title                                                                  status   date   assigned-to' + colors.colors['default']
+        print colors.colors['blue-on-white'] + 'id      type    title                                                        status   date   assigned-to' + colors.colors['default']
         #TODO: in case of no color support, we should print a line instead
         #print '------- ------- ---------------------------------------------------------------------- -------- ------ --------------------------------'
         for lineno, ticket in enumerate(tickets):
           print ticket.oneline(lineno + 1)
-        print ''
       else:
         print 'no issues'
+      print ''
 
   def rm(self, sha):
     match = self.match_or_error(sha)
@@ -146,4 +136,5 @@ class Gitit:
     else:
       log.printerr('error removing ticket \'%s\'' % sha7)
       sys.exit(1)
+
 
