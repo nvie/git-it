@@ -67,6 +67,7 @@ class Gitit:
 
   def new(self):
     i = issue.Issue()
+    i.issuer = '%s <%s>' % (os.popen('git config user.name').read().strip(), os.popen('git config user.email').read().strip())
 
     # Create a new temporary file to edit a new ticket
     itdb = repo.find_itdb()
@@ -83,12 +84,15 @@ class Gitit:
       log.printerr('editing cancelled. no new ticket added.')
       return
 
-    #s = sha.new()
-    #s.update(i.__str__())
-    #s.update(os.getlogin())
-    #s.update(datetime.datetime.now().__str__())
-    #filename = os.path.join(itdb, 'tickets', s.hexdigest())
-    #self.store_ticket(i.__str__(), filename)
+    # TODO: Add a check here to see whether all info is filled in correctly!
+    i = issue.Issue(workfile)
+
+    s = sha.new()
+    s.update(i.__str__())
+    s.update(os.getlogin())
+    s.update(datetime.datetime.now().__str__())
+    filename = os.path.join(itdb, 'tickets', s.hexdigest())
+    self.store_ticket(i.__str__(), filename)
     #os.system('git add "%s"' % itdb)
     #os.system('git commit -m "added ticket \'%s\'" "%s"' % (i.title, itdb))
     return i
