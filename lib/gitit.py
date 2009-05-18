@@ -1,7 +1,7 @@
 import sys, os, dircache
 import datetime
 import sha
-import misc, repo, log, issue
+import misc, repo, log, issue, colors
 
 class Gitit:
   def __init__(self):
@@ -105,15 +105,22 @@ class Gitit:
       log.printerr('Run \'it init\' to initialize now')
       return
     ticketdir = os.path.join(itdb, 'tickets')
-    list = dircache.listdir(ticketdir)
-    list = [ issue.Issue(os.path.join(ticketdir, x)) for x in list ]
-    if len(list) > 0:
-      print 'id      type    title                               status   date   assigned-to'
-      print '------- ------- ----------------------------------- -------- ------ ----------------'
-      for lineno, ticket in enumerate(list):
-        print ticket.oneline(lineno + 1)
-    else:
-      print 'no issues'
+    releasedirs = dircache.listdir(ticketdir)
+    for releasedir in releasedirs:
+      fullreleasedir = os.path.join(ticketdir, releasedir)
+      ticketfiles = dircache.listdir(fullreleasedir)
+      tickets = [ issue.Issue(os.path.join(fullreleasedir, t)) for t in ticketfiles ]
+      print colors.colors['red-on-white'] + '%-16s' % releasedir + colors.colors['default'] + \
+            '[' + colors.colors['green'] + '                   ' + colors.colors['default'] + '            ] 75%'
+      if len(tickets) > 0:
+        print colors.colors['blue-on-white'] + 'id      type    title                                                                  status   date   assigned-to' + colors.colors['default']
+        #TODO: in case of no color support, we should print a line instead
+        #print '------- ------- ---------------------------------------------------------------------- -------- ------ --------------------------------'
+        for lineno, ticket in enumerate(tickets):
+          print ticket.oneline(lineno + 1)
+        print ''
+      else:
+        print 'no issues'
 
   def rm(self, sha):
     match = self.match_or_error(sha)
