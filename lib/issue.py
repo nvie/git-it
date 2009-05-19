@@ -15,6 +15,16 @@ def ask_for_pattern(message, pattern = None):
   return input
 
 def create_interactive():
+  # First, do some checks to error early
+  fullname = os.popen('git config user.name').read().strip()
+  email = os.popen('git config user.email').read().strip()
+  if not fullname:
+    log.printerr('author name not set. use "git config [--global] user.name \'John Smith\'" to set the fullname')
+    return
+  if not fullname:
+    log.printerr('author name not set. use "git config [--global] user.name \'John Smith\'" to set the fullname')
+    return
+
   i = Issue()
   i.title = ask_for_pattern('Title: ', not_empty)
 
@@ -33,7 +43,7 @@ def create_interactive():
   #i.body = ask_for_multiline_pattern('Describe the ticket:\n')
   i.status = 'open'
   i.date = datetime.datetime.now()
-  i.issuer = '%s <%s>' % (os.popen('git config user.name').read().strip(), os.popen('git config user.email').read().strip())
+  i.issuer = '%s <%s>' % (fullname, email)
   return i
 
 class Issue:
