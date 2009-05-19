@@ -1,15 +1,31 @@
 import sys, os, dircache
 import datetime
 import sha
-import misc, repo, log, issue, colors, git
+import misc, repo, log, issue, colors, git, it
 
 class Gitit:
   def __init__(self):
     pass
 
+  def itdb_exists(self):
+    if git.branch_exists(it.ITDB_BRANCH):
+      ls = git.full_tree(it.ITDB_BRANCH)
+      abs_hold_file = os.path.join(it.TICKET_DIR, it.HOLD_FILE)
+      for _, _, _, file in ls:
+        if file == abs_hold_file:
+          return True
+      return False
+
+  def require_itdb(self):
+    """
+    This method asserts that the itdb is initialized, or errors if not.
+    """
+    if not self.itdb_exists():
+      log.printerr('itdb not yet initialized. run \'it init\' first to create a new itdb.')
+      sys.exit(1)
+
   def init(self):
-    db = repo.find_itdb()
-    if db:
+    if self.itdb_exists():
       print 'Already initialized issue database in \'.it\''
       return
 
@@ -19,19 +35,27 @@ class Gitit:
       log.printerr('Not a valid Git repository.')
     else:
       parent, _ = os.path.split(gitrepo)
-      itdir = os.path.join(parent, '.it')
-      misc.mkdirs(os.path.join(itdir, 'tickets'))
-      misc.mkdirs(os.path.join(itdir, 'tmp'))
-      print 'Initialized empty issue database in \'.it\''
+      ticket_dir = os.path.join(parent, it.TICKET_DIR)
+      hold_file = os.path.join(ticket_dir, it.HOLD_FILE)
+      misc.mkdirs(ticket_dir)
+      misc.write_file_contents(hold_file, \
+               'This is merely placeholder file for git-it that prevents this directory from\n' + \
+               'being pruned by Git.')
+
+      # Commit the new itdb to the repo
+      curr_branch = git.current_branch()
+      git.change_head_branch('git-it')
+      git.command_lines('add', [hold_file])
+      msg = 'Initialized empty ticket database.'
+      git.command_lines('commit', ['-m', msg, hold_file])
+      os.remove(hold_file)
+      os.rmdir(ticket_dir)
+      git.change_head_branch(curr_branch)
+      print 'Initialized empty ticket database.'
 
   def match_or_error(self, sha):
-    itdb = repo.find_itdb()
-    if not itdb:
-      log.printerr('Issue database not yet initialized')
-      log.printerr('Run \'it init\' to initialize now')
-      return
-
-    ticketdir = os.path.join(itdb, 'tickets')
+    self.require_itdb()
+    ticketdir = os.path.join(itdb, it.TICKET_DIR)
     releases = dircache.listdir(ticketdir)
     matches = []
     for rel in releases:
@@ -85,17 +109,13 @@ class Gitit:
 
   def show(self, sha):
     match = self.match_or_error(sha)
-    i = issue.Issue(match)
+    i = issue.create_from_file(match)
     i.print_ticket()
 
   def new(self):
-    # Create a new temporary file to edit a new ticket
-    itdb = repo.find_itdb()
-    if not itdb:
-      log.printerr('Issue database not yet initialized')
-      log.printerr('Run \'it init\' to initialize now')
-      return
+    self.require_itdb()
 
+    # Create a fresh ticket
     i = issue.create_interactive()
 
     # Generate a SHA1 id
@@ -114,11 +134,11 @@ class Gitit:
     # Commit the new ticket to the 'aaa' branch
     curr_branch = git.current_branch()
     git.change_head_branch('git-it')
-    os.system('git add "%s"' % i.filename())
+    git.command_lines('add', [i.filename()])
     msg = '%s added ticket \'%s\'' % (i.issuer, sha7)
-    os.system('git commit -m "%s" "%s"' % (msg, i.filename()))
+    git.command_lines('commit', ['-m', msg, i.filename()])
     os.remove(i.filename())
-    os.system('git rm --cached "%s"' % i.filename())
+    git.command_lines('rm', ['--cached', i.filename()])
     git.change_head_branch(curr_branch)
     return i
 
@@ -129,22 +149,23 @@ class Gitit:
     return '[' + colors.colors['green'] + format_string_done + colors.colors['default'] + format_string_togo + '] %d%%' % int(percentage_done * 100)
 
   def list(self):
-    itdb = repo.find_itdb()
-    if not itdb:
-      log.printerr('Issue database not yet initialized')
-      log.printerr('Run \'it init\' to initialize now')
+    self.require_itdb()
+    releasedirs = filter(lambda x: x[1] == 'tree', git.tree(it.ITDB_BRANCH + ':' + it.TICKET_DIR))
+    if len(releasedirs) == 0:
+      print 'no tickets yet. use \'it new\' to add new tickets.'
       return
 
-    ticketdir = os.path.join(itdb, 'tickets')
-    releasedirs = dircache.listdir(ticketdir)
-    for releasedir in releasedirs:
-      fullreleasedir = os.path.join(ticketdir, releasedir)
-      ticketfiles = dircache.listdir(fullreleasedir)
-      tickets = [ issue.Issue(os.path.join(fullreleasedir, t)) for t in ticketfiles ]
+    for _, _, sha, rel in releasedirs:
+      reldir = os.path.join(it.TICKET_DIR, rel)
+      ticketfiles = git.tree(it.ITDB_BRANCH + ':' + reldir)
+      tickets = [ issue.create_from_lines(git.cat_file(sha), ticket_id, rel) \
+                  for _, type, sha, ticket_id in ticketfiles \
+                  if type == 'blob' and ticket_id != it.HOLD_FILE \
+                ]
 
       total = len(filter(lambda x: x.status != 'rejected', tickets)) * 1.0
       done = len(filter(lambda x: x.status not in ['open', 'rejected'], tickets)) * 1.0
-      release_line = colors.colors['red-on-white'] + '%-16s' % releasedir + colors.colors['default']
+      release_line = colors.colors['red-on-white'] + '%-16s' % rel + colors.colors['default']
 
       # Show a progress bar only when there are items in this release
       if total > 0:
@@ -156,10 +177,10 @@ class Gitit:
         print colors.colors['blue-on-white'] + 'id      type    title                                                        status   date   assigned-to' + colors.colors['default']
         #TODO: in case of no color support, we should print a line instead
         #print '------- ------- ---------------------------------------------------------------------- -------- ------ --------------------------------'
-        for lineno, ticket in enumerate(tickets):
-          print ticket.oneline(lineno + 1)
+        for ticket in tickets:
+          print ticket.oneline()
       else:
-        print 'no issues'
+        print 'no tickets'
       print ''
 
   def rm(self, sha):
@@ -176,7 +197,7 @@ class Gitit:
     match = self.match_or_error(sha)
     _, basename = os.path.split(match)
     sha7 = misc.chop(basename, 7)
-    i = issue.Issue(match)
+    i = issue.create_from_file(match)
     if i.status != 'open':
       log.printerr('ticket \'%s\' already %s' % (sha7, i.status))
       sys.exit(1)
@@ -189,7 +210,7 @@ class Gitit:
     match = self.match_or_error(sha)
     _, basename = os.path.split(match)
     sha7 = misc.chop(basename, 7)
-    i = issue.Issue(match)
+    i = issue.create_from_file(match)
     if i.status == 'open':
       log.printerr('ticket \'%s\' already open' % sha7)
       sys.exit(1)
