@@ -46,7 +46,19 @@ def create_interactive():
   i.issuer = '%s <%s>' % (fullname, email)
   return i
 
+def file_as_dict(filename):
+  """
+  Read a file as a series of lines representing dictionary entries in the
+  format of "key: value" (that is: key, colon, value)
+  """
+
 class Issue:
+  # How each status is visually printed
+  status_colors = { 'open': 'bold', \
+                    'closed': 'default', \
+	'rejected': 'red-on-white', \
+	'fixed': 'green-on-white' }
+
   def __init__(self, ticket_file = None):
     self.title = ''
     self.type = 'issue'
@@ -61,14 +73,31 @@ class Issue:
 
     # Now, read the ticket file if given
     if ticket_file is not None:
-      ticket = misc.file_as_dict(ticket_file)
+      f = open(ticket_file, 'r')
+      ticket = {}
+      ticket[None] = ''
+      try:
+        lines = f.read().split('\n')
+        for line in lines:
+          if line.strip() == '' or line[0] == '#':
+            continue
+          pos = line.find(':')
+          if pos >= 0:
+            key = line[:pos].strip()
+            val = line[pos+1:].strip()
+            ticket[key] = val
+          else:
+            ticket[None] += line + os.linesep
+      finally:
+        f.close()
+
       self.title = ticket['Subject']
       self.type = ticket['Type']
       self.issuer = ticket['Issuer']
       # TODO: Implement
       #self.date = ticket['Date']
       self.date = datetime.datetime.now()
-      self.body = ''
+      self.body = ticket[None]
       self.prio = ticket['Priority']
       self.status = ticket['Status']
       self.assigned_to = ticket['Assigned to']
@@ -76,14 +105,14 @@ class Issue:
       _, self.release = os.path.split(dir)
 
   def oneline(self, lineno = None):
-    status_colors = { 'open' : 'bold', 'closed' : 'default', 'rejected' : 'red-on-white', 'fixed' : 'green-on-white' }
     date = '%s/%s' % (self.date.month, self.date.day)
-    subject = '%s%-60s%s' % (colors.colors[status_colors[self.status]], misc.chop(self.title, 60, '..'), colors.colors['default'])
-    status = '%s%-8s%s' % (colors.colors[status_colors[self.status]], misc.chop(self.status, 8), colors.colors['default'])
+    subject = '%s%-60s%s' % (colors.colors[self.status_colors[self.status]], misc.chop(self.title, 60, '..'), colors.colors['default'])
+    status = '%s%-8s%s' % (colors.colors[self.status_colors[self.status]], misc.chop(self.status, 8), colors.colors['default'])
     return '%-7s %-7s %s %s %-6s %-32s' % \
            (misc.chop(self.id, 7),
             misc.chop(self.type, 7), subject, status,
-            date, misc.chop(self.assigned_to, 32, '..'))
+            date, misc.chop(self.assigned_to, 32, '..'),
+           )
 
   def __str__(self):
     headers = [ 'Subject: %s'     % self.title,
@@ -98,6 +127,26 @@ class Issue:
                 self.body
               ]
     return os.linesep.join(headers)
+
+  def print_ticket_field(self, field, value, color_field = None, color_value = None):
+    if not color_field:
+      color_field = 'red-on-white'
+    if not color_value:
+      color_value = 'default'
+    print '%s%s:%s %s%s%s' % (colors.colors[color_field], field, colors.colors['default'], \
+                              colors.colors[color_value], value, colors.colors['default'])
+
+  def print_ticket(self):
+    self.print_ticket_field('Subject', self.title)
+    self.print_ticket_field('Issuer', self.issuer)
+    self.print_ticket_field('Date', self.date)
+    self.print_ticket_field('Type', self.type)
+    self.print_ticket_field('Priority', self.prio)
+    self.print_ticket_field('Status', self.status, None, self.status_colors[self.status])
+    self.print_ticket_field('Assigned to', self.assigned_to)
+    self.print_ticket_field('Release', self.release)
+    print ''
+    print self.body
 
   def filename(self):
     itdb = repo.find_itdb()

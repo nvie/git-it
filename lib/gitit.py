@@ -86,7 +86,7 @@ class Gitit:
   def show(self, sha):
     match = self.match_or_error(sha)
     i = issue.Issue(match)
-    print i.__str__()
+    i.print_ticket()
 
   def new(self):
     i = issue.create_interactive()
