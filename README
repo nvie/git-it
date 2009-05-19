@@ -1,6 +1,7 @@
-Git-it is an issue tracker, using a specific branch in a Git repository to
-keep a managed list of issues, bugs, features or tasks in sync with co-
-developers.
+Git-it is an issue tracker, implemented in Python. Git-it can register tickets
+alongside source code for the project, to keep a managed list of issues, bugs,
+features or tasks in sync with co-developers and to manage project and
+milestone progress.
 
 Authors:
 Vincent Driessen <vincent@datafox.nl>
