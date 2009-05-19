@@ -57,6 +57,7 @@ class Gitit:
     _, basename = os.path.split(match)
     sha7 = misc.chop(basename, 7)
     if os.system('vim "%s"' % match) == 0:
+      # TODO: Add a check here to assert validity of the edit
       print 'ticket \'%s\' edited succesfully' % sha7
       self.list()
     else:
@@ -156,5 +157,31 @@ class Gitit:
     else:
       log.printerr('error removing ticket \'%s\'' % sha7)
       sys.exit(1)
+
+  def finish_ticket(self, sha, new_status):
+    match = self.match_or_error(sha)
+    _, basename = os.path.split(match)
+    sha7 = misc.chop(basename, 7)
+    i = issue.Issue(match)
+    if i.status != 'open':
+      log.printerr('ticket \'%s\' already %s' % (sha7, i.status))
+      sys.exit(1)
+    i.status = new_status
+    i.save()
+    print 'ticket \'%s\' %s' % (sha7, new_status)
+    self.list()
+
+  def reopen_ticket(self, sha):
+    match = self.match_or_error(sha)
+    _, basename = os.path.split(match)
+    sha7 = misc.chop(basename, 7)
+    i = issue.Issue(match)
+    if i.status == 'open':
+      log.printerr('ticket \'%s\' already open' % sha7)
+      sys.exit(1)
+    i.status = 'open'
+    i.save()
+    print 'ticket \'%s\' reopened' % sha7
+    self.list()
 
 

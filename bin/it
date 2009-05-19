@@ -23,9 +23,10 @@ def usage():
   print '  mv        Moves the given ticket to a release.'
   print ''
   print 'Changing status:'
-  print '  open      Opens an issue.'
-  print '  close     Closes an issue.'
-  print '  reject    Rejects an issue.'
+  print '  reopen    Reopens an issue.'
+  print '  close     Mark a ticket as closed.'
+  print '  reject    Mark a ticket as rejected.'
+  print '  fix       Mark a ticket as fixed.'
 
 # Parse input options
 opts = []
@@ -54,7 +55,7 @@ if len(params) == 0:
 # Valid subcommand?
 subcmd = params[0]
 del params[0]
-if not subcmd in [ 'init', 'list', 'show', 'new', 'edit', 'mv', 'rm', 'open', 'close', 'reject' ]:
+if not subcmd in [ 'init', 'list', 'show', 'new', 'edit', 'mv', 'rm', 'reopen', 'close', 'fix', 'reject' ]:
   log.printerr('Unknown subcommand \'%s\'.' % subcmd)
   usage()
   sys.exit(1)
@@ -87,4 +88,24 @@ elif subcmd == 'rm':
     log.printerr('usage: it rm -f <id>')
     sys.exit(1)
   g.rm(params[1])
+elif subcmd == 'close':
+  if len(params) != 1:
+    log.printerr('usage: it close <id>')
+    sys.exit(1)
+  g.finish_ticket(params[0], 'closed')
+elif subcmd == 'fix':
+  if len(params) != 1:
+    log.printerr('usage: it fix <id>')
+    sys.exit(1)
+  g.finish_ticket(params[0], 'fixed')
+elif subcmd == 'reject':
+  if len(params) != 1:
+    log.printerr('usage: it close <id>')
+    sys.exit(1)
+  g.finish_ticket(params[0], 'rejected')
+elif subcmd == 'reopen':
+  if len(params) != 1:
+    log.printerr('usage: it reopen <id>')
+    sys.exit(1)
+  g.reopen_ticket(params[0])
 
