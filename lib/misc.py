@@ -15,6 +15,18 @@ def mkdirs(newdir, mode=0777):
     if err.errno != errno.EEXIST or not os.path.isdir(newdir):
       raise
 
+def rmdirs(dir):
+  # TODO: Implement recursive delete of a dir!
+  #try:
+  #  os.makedirs(newdir, mode)
+  #except OSError, err:
+  #  # Reraise the error unless it's about an already existing directory
+  #  if err.errno != errno.EEXIST or not os.path.isdir(newdir):
+  #    raise
+  import log
+  log.printerr('TODO: rmdirs should really be implemented!')
+  pass
+
 def read_file_contents(filename):
   try:
     f = open(filename, 'r')

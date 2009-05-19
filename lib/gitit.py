@@ -51,19 +51,17 @@ class Gitit:
       os.remove(hold_file)
       os.rmdir(ticket_dir)
       git.change_head_branch(curr_branch)
+      misc.rmdirs(os.path.join(repo.find_root(), it.TICKET_DIR))
       print 'Initialized empty ticket database.'
 
   def match_or_error(self, sha):
     self.require_itdb()
-    ticketdir = os.path.join(itdb, it.TICKET_DIR)
-    releases = dircache.listdir(ticketdir)
+    files = git.full_tree(it.ITDB_BRANCH + ':' + it.TICKET_DIR)
     matches = []
-    for rel in releases:
-      reldir = os.path.join(ticketdir, rel)
-      files = dircache.listdir(reldir)
-      for file in files:
-        if file.startswith(sha):
-          matches.append(os.path.join(reldir, file))
+    for _, _, _, path in files:
+      _, file = os.path.split(path)
+      if file.startswith(sha):
+        matches.append(path)
 
     if len(matches) == 0:
       log.printerr('no such ticket')
@@ -71,10 +69,11 @@ class Gitit:
     elif len(matches) > 1:
       log.printerr('ambiguous match critiria. the following tickets match:')
       for match in matches:
-        log.printerr('- %s' % match)
+        _, id = os.path.split(match)
+        log.printerr(id)
       sys.exit(1)
     else:
-      return os.path.join(ticketdir, matches[0])
+      return os.path.join(it.TICKET_DIR, matches[0])
 
   def edit(self, sha):
     match = self.match_or_error(sha)
@@ -140,6 +139,7 @@ class Gitit:
     os.remove(i.filename())
     git.command_lines('rm', ['--cached', i.filename()])
     git.change_head_branch(curr_branch)
+    misc.rmdirs(os.path.join(repo.find_root(), it.TICKET_DIR))
     return i
 
   def progress_bar(self, percentage_done, width = 32):
@@ -187,11 +187,15 @@ class Gitit:
     match = self.match_or_error(sha)
     _, basename = os.path.split(match)
     sha7 = misc.chop(basename, 7)
-    if os.system('rm "%s"' % match) == 0:
-      print 'ticket \'%s\' removed'% sha7
-    else:
-      log.printerr('error removing ticket \'%s\'' % sha7)
-      sys.exit(1)
+
+    # Commit the new itdb to the repo
+    curr_branch = git.current_branch()
+    git.change_head_branch('git-it')
+    msg = 'removed ticket \'%s\'' % sha7
+    git.command_lines('commit', ['-m', msg, match])
+    git.change_head_branch(curr_branch)
+    misc.rmdirs(os.path.join(repo.find_root(), it.TICKET_DIR))
+    print 'ticket \'%s\' removed'% sha7
 
   def finish_ticket(self, sha, new_status):
     match = self.match_or_error(sha)
