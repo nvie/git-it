@@ -106,7 +106,6 @@ class Gitit:
     _, ticketname = os.path.split(i.filename())
     sha7 = misc.chop(ticketname, 7)
     print 'new ticket \'%s\' saved' % sha7
-    print 'new ticket \'%s\' saved' % i.filename()
     return i
 
   def progress_bar(self, percentage_done, width = 32):
