@@ -1,7 +1,7 @@
 import sys, os, dircache
 import datetime
 import sha
-import misc, repo, log, issue, colors
+import misc, repo, log, issue, colors, git
 
 class Gitit:
   def __init__(self):
@@ -106,6 +106,14 @@ class Gitit:
     _, ticketname = os.path.split(i.filename())
     sha7 = misc.chop(ticketname, 7)
     print 'new ticket \'%s\' saved' % sha7
+
+    # Commit the new ticket to the 'aaa' branch
+    curr_branch = git.branch_current()
+    git.change_head_branch('aaa')
+    os.system('git add "%s"' % i.filename())
+    msg = '%s added ticket \'%s\'' % (i.issuer, sha7)
+    os.system('git commit -m "%s" "%s"' % (msg, i.filename()))
+    git.change_head_branch(curr_branch)
     return i
 
   def progress_bar(self, percentage_done, width = 32):
@@ -120,6 +128,7 @@ class Gitit:
       log.printerr('Issue database not yet initialized')
       log.printerr('Run \'it init\' to initialize now')
       return
+
     ticketdir = os.path.join(itdb, 'tickets')
     releasedirs = dircache.listdir(ticketdir)
     for releasedir in releasedirs:
