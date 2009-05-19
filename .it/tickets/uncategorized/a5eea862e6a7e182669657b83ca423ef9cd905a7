@@ -1,0 +1,12 @@
+Subject: Make the progress bars show the relative effort that has been done
+Issuer: Vincent Driessen <vincent@datafox.nl>
+Date: 2009-05-19 07:34:03.184345
+Type: feature
+Priority: 3
+Status: open
+Assigned to: -
+
+Every ticket should get a relative weight set (major change, minor change,
+fix). According to this weight, the progress bars can give a more 'realistic'
+feeling. For example, we can grade a major change 10x the size of a fix, and a
+minor change 3 times the fix size.

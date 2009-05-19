@@ -1,0 +1,10 @@
+Subject: Allow a body description for tickets
+Issuer: Vincent Driessen <vincent@datafox.nl>
+Date: 2009-05-19 10:08:59.825232
+Type: feature
+Priority: 1
+Status: fixed
+Assigned to: -
+
+A body text, such as this one itself, should be allowed on every ticket.
+Reading and editing the ticket should not have any effect on its value.
