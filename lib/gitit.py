@@ -127,8 +127,8 @@ class Gitit:
       ticketfiles = dircache.listdir(fullreleasedir)
       tickets = [ issue.Issue(os.path.join(fullreleasedir, t)) for t in ticketfiles ]
 
-      total = len(tickets) * 1.0
-      done = len(filter(lambda x: x.status != 'open', tickets)) * 1.0
+      total = len(filter(lambda x: x.status != 'rejected', tickets)) * 1.0
+      done = len(filter(lambda x: x.status not in ['open', 'rejected'], tickets)) * 1.0
       release_line = colors.colors['red-on-white'] + '%-16s' % releasedir + colors.colors['default']
 
       # Show a progress bar only when there are items in this release
