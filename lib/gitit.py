@@ -1,4 +1,4 @@
-import sys, os, dircache
+import sys, os
 import datetime
 import sha
 import misc, repo, log, issue, colors, git, it

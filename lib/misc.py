@@ -1,4 +1,5 @@
-import os, errno
+import os, errno, dircache
+import log
 
 def chop(s, maxlen = 20, suffix = ''):
   if len(s) > maxlen:
@@ -16,16 +17,36 @@ def mkdirs(newdir, mode=0777):
       raise
 
 def rmdirs(dir):
-  # TODO: Implement recursive delete of a dir!
-  #try:
-  #  os.makedirs(newdir, mode)
-  #except OSError, err:
-  #  # Reraise the error unless it's about an already existing directory
-  #  if err.errno != errno.EEXIST or not os.path.isdir(newdir):
-  #    raise
-  import log
-  log.printerr('TODO: rmdirs should really be implemented!')
-  pass
+  if not os.path.exists(dir):
+    return True
+
+  if not os.path.isdir(dir):
+    log.printerr('\'%s\': not a directory' % dir)
+    return False
+
+  # First, remove all children of dir
+  ls = dircache.listdir(dir)
+  ok = True
+  for file in ls:
+    full = os.path.join(dir, file)
+    if os.path.isdir(full):
+      if not rmdirs(full):
+        ok = False
+    else:
+      try:
+        os.path.remove(full)
+      except OSError, e:
+        log.printerr('could not remove file \'%s\'' % full)
+        ok = False
+
+  # Finally, remove the empty dir itself
+  if ok:
+    try:
+      os.rmdir(dir)
+    except OSError, e:
+      log.printerr('could not remove directory \'%s\'' % dir)
+      ok = False
+  return ok
 
 def read_file_contents(filename):
   try:
