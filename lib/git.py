@@ -23,6 +23,9 @@ def full_tree(branch):
     objs.append((mode, type, sha, file))
   return objs
 
+def change_head_branch(branch):
+  return command_lines('symbolic-ref', ['HEAD', 'refs/heads/%s' % branch])
+
 def command_lines(subcmd, opts = []):
   output = os.popen('git %s %s' % (subcmd, ' '.join(opts))).read()
   if output.endswith(os.linesep):

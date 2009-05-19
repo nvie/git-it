@@ -3,6 +3,7 @@ import datetime
 import colors
 import misc
 import repo
+import log
 
 def not_empty(s):
   return s.strip() != ''

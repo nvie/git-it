@@ -89,10 +89,14 @@ class Gitit:
     i.print_ticket()
 
   def new(self):
-    i = issue.create_interactive()
-
     # Create a new temporary file to edit a new ticket
     itdb = repo.find_itdb()
+    if not itdb:
+      log.printerr('Issue database not yet initialized')
+      log.printerr('Run \'it init\' to initialize now')
+      return
+
+    i = issue.create_interactive()
 
     # Generate a SHA1 id
     s = sha.new()
@@ -108,11 +112,13 @@ class Gitit:
     print 'new ticket \'%s\' saved' % sha7
 
     # Commit the new ticket to the 'aaa' branch
-    curr_branch = git.branch_current()
-    git.change_head_branch('aaa')
+    curr_branch = git.current_branch()
+    git.change_head_branch('git-it')
     os.system('git add "%s"' % i.filename())
     msg = '%s added ticket \'%s\'' % (i.issuer, sha7)
     os.system('git commit -m "%s" "%s"' % (msg, i.filename()))
+    os.remove(i.filename())
+    os.system('git rm --cached "%s"' % i.filename())
     git.change_head_branch(curr_branch)
     return i
 
