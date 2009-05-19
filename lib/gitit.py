@@ -42,7 +42,7 @@ class Gitit:
           matches.append(os.path.join(reldir, file))
 
     if len(matches) == 0:
-      log.printerr('no matching ticket')
+      log.printerr('no such ticket')
       sys.exit(1)
     elif len(matches) > 1:
       log.printerr('ambiguous match critiria. the following tickets match:')
