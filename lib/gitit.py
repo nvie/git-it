@@ -134,19 +134,39 @@ class Gitit:
     os.remove(it.EDIT_TMP_FILE)
 
   def mv(self, sha, to_rel):
-    match = self.match_or_error(sha)
-    src_rel, basename = os.path.split(match)
-    sha7 = misc.chop(basename, 7)
-    to_rel_abs = os.path.abspath(os.path.join(src_rel, '..', to_rel))
-    if not os.path.isdir(to_rel_abs):
-      log.printerr('no such release \'%s\'' % to_rel)
-      return
-    if to_rel_abs == src_rel:
+    self.require_itdb()
+    i, rel, fullsha, src_path = self.get_ticket(sha)
+    sha7 = misc.chop(fullsha, 7)
+
+    src_dir = os.path.join(repo.find_root(), it.TICKET_DIR, rel)
+    target_dir = os.path.join(repo.find_root(), it.TICKET_DIR, to_rel)
+    target_path = os.path.join(target_dir, fullsha)
+    if src_dir == target_dir:
       log.printerr('ticket \'%s\' already in \'%s\'' % (sha7, to_rel))
       return
 
+    # Create the target dir, if neccessary
+    if not os.path.isdir(target_dir):
+      misc.mkdirs(target_dir)
+
+    # Try to move the file into it
     try:
-      os.rename(match, os.path.join(to_rel_abs, basename))
+      # Commit the new itdb to the repo
+      curr_branch = git.current_branch()
+      git.change_head_branch('git-it')
+
+      i.save(target_path)
+      if os.path.isfile(src_path):
+        os.remove(src_path)
+
+      msg = 'moved ticket \'%s\' (%s --> %s)' % (sha7, rel, to_rel)
+      git.command_lines('add', [target_path])
+      git.command_lines('commit', ['-m', msg, src_path, target_path])
+      git.change_head_branch(curr_branch)
+      abs_ticket_dir = os.path.join(repo.find_root(), it.TICKET_DIR)
+      git.command_lines('reset', ['HEAD', abs_ticket_dir])
+      misc.rmdirs(abs_ticket_dir)
+
       print 'ticket \'%s\' moved to release \'%s\'' % (sha7, to_rel)
       print ''
       self.list()
