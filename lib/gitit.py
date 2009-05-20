@@ -21,7 +21,8 @@ class Gitit:
     This method asserts that the itdb is initialized, or errors if not.
     """
     if not self.itdb_exists():
-      log.printerr('itdb not yet initialized. run \'it init\' first to create a new itdb.')
+      log.printerr('itdb not yet initialized. run \'it init\' first to ' + \
+                   'create a new itdb.')
       sys.exit(1)
 
   def init(self):
@@ -39,8 +40,8 @@ class Gitit:
       hold_file = os.path.join(ticket_dir, it.HOLD_FILE)
       misc.mkdirs(ticket_dir)
       misc.write_file_contents(hold_file, \
-               'This is merely placeholder file for git-it that prevents this directory from\n' + \
-               'being pruned by Git.')
+               'This is merely placeholder file for git-it that prevents ' + \
+               'this directory from\nbeing pruned by Git.')
 
       # Commit the new itdb to the repo
       curr_branch = git.current_branch()
@@ -146,11 +147,14 @@ class Gitit:
     blocks_done = int(percentage_done * 1.0 * width)
     format_string_done = ('%%-%ds' % blocks_done) % ''
     format_string_togo = ('%%-%ds' % (width - blocks_done)) % ''
-    return '[' + colors.colors['green'] + format_string_done + colors.colors['default'] + format_string_togo + '] %d%%' % int(percentage_done * 100)
+    return '[' + colors.colors['green'] + format_string_done + \
+           colors.colors['default'] + format_string_togo + '] %d%%' % \
+           int(percentage_done * 100)
 
   def list(self):
     self.require_itdb()
-    releasedirs = filter(lambda x: x[1] == 'tree', git.tree(it.ITDB_BRANCH + ':' + it.TICKET_DIR))
+    releasedirs = filter(lambda x: x[1] == 'tree', git.tree(it.ITDB_BRANCH + \
+                                                         ':' + it.TICKET_DIR))
     if len(releasedirs) == 0:
       print 'no tickets yet. use \'it new\' to add new tickets.'
       return
@@ -164,8 +168,10 @@ class Gitit:
                 ]
 
       total = len(filter(lambda x: x.status != 'rejected', tickets)) * 1.0
-      done = len(filter(lambda x: x.status not in ['open', 'rejected'], tickets)) * 1.0
-      release_line = colors.colors['red-on-white'] + '%-16s' % rel + colors.colors['default']
+      done = len(filter(lambda x: x.status not in ['open', 'rejected'], \
+                                                                tickets)) * 1.0
+      release_line = colors.colors['red-on-white'] + '%-16s' % rel + \
+                                                       colors.colors['default']
 
       # Show a progress bar only when there are items in this release
       if total > 0:
@@ -197,29 +203,52 @@ class Gitit:
     misc.rmdirs(os.path.join(repo.find_root(), it.TICKET_DIR))
     print 'ticket \'%s\' removed'% sha7
 
-  def finish_ticket(self, sha, new_status):
+  def get_ticket(self, sha):
     match = self.match_or_error(sha)
-    _, basename = os.path.split(match)
+    contents = git.cat_file(it.ITDB_BRANCH + ':' + match)
+    parent, basename = os.path.split(match)
+    rel = os.path.basename(parent)
     sha7 = misc.chop(basename, 7)
-    i = issue.create_from_file(match)
+    i = issue.create_from_lines(contents, basename, rel)
+    return (i, match)
+
+  def finish_ticket(self, sha, new_status):
+    sha7 = misc.chop(sha, 7)
+    i, match = self.get_ticket(sha)
     if i.status != 'open':
       log.printerr('ticket \'%s\' already %s' % (sha7, i.status))
       sys.exit(1)
+
+    # Now, when the edit has succesfully taken place, switch branches, commit,
+    # and switch back
+    curr_branch = git.current_branch()
+    git.change_head_branch('git-it')
+    msg = '%s ticket \'%s\'' % (i.status, sha7)
     i.status = new_status
     i.save()
+    git.command_lines('commit', ['-m', msg, match])
+    git.change_head_branch(curr_branch)
+    misc.rmdirs(os.path.join(repo.find_root(), it.TICKET_DIR))
     print 'ticket \'%s\' %s' % (sha7, new_status)
     self.list()
 
   def reopen_ticket(self, sha):
-    match = self.match_or_error(sha)
-    _, basename = os.path.split(match)
-    sha7 = misc.chop(basename, 7)
-    i = issue.create_from_file(match)
+    sha7 = misc.chop(sha, 7)
+    i, match = self.get_ticket(sha)
     if i.status == 'open':
       log.printerr('ticket \'%s\' already open' % sha7)
       sys.exit(1)
+
+    # Now, when the edit has succesfully taken place, switch branches, commit,
+    # and switch back
+    curr_branch = git.current_branch()
+    git.change_head_branch('git-it')
+    msg = 'ticket \'%s\' reopened' % sha7
     i.status = 'open'
     i.save()
+    git.command_lines('commit', ['-m', msg, match])
+    git.change_head_branch(curr_branch)
+    misc.rmdirs(os.path.join(repo.find_root(), it.TICKET_DIR))
     print 'ticket \'%s\' reopened' % sha7
     self.list()
 

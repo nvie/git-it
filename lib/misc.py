@@ -34,7 +34,7 @@ def rmdirs(dir):
         ok = False
     else:
       try:
-        os.path.remove(full)
+        os.remove(full)
       except OSError, e:
         log.printerr('could not remove file \'%s\'' % full)
         ok = False
