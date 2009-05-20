@@ -1,7 +1,35 @@
-Git-it is an issue tracker, implemented in Python. Git-it can register tickets
-alongside source code for the project, to keep a managed list of issues, bugs,
-features or tasks in sync with co-developers and to manage project and
-milestone progress.
+Git-it is a Git issue tracker, implemented in Python. Git-it can register
+tickets alongside Git-managed source code for a project, to keep a managed list
+of issues, bugs, features or tasks in sync with co-developers and to manage
+project and milestone progress.
+
+Typical commands to get started with git-it is:
+- Initialize a new ticket database:
+	it init
+
+- Push the ticket database branch to an upstream repo, if applicable:
+	git push origin git-it
+
+- Other developers can now fetch the branch from an upstream repo, if
+  applicable:
+	git fetch origin git-it
+	git co -b git-it origin/git-it
+
+Then, typical workflow with git-it is:
+- Fetch and push changes to sync with upstream:
+	it sync 	(not yet implemented!)
+
+- List all tickets:
+	it list
+
+- Add a new ticket:
+	it new
+
+- Close/reopen existing tickets:
+	it fix <ticket-id>
+	it reject <ticket-id>
+	it close <ticket-id>
+	it reopen <ticket-id>
 
 Authors:
 Vincent Driessen <vincent@datafox.nl>
