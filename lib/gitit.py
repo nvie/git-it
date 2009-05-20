@@ -27,7 +27,8 @@ class Gitit:
 
   def init(self):
     if self.itdb_exists():
-      print 'Already initialized issue database in \'.it\''
+      print 'Already initialized issue database in branch \'%s\'.' % \
+                                                             it.ITDB_BRANCH
       return
 
     # else, initialize the new .it database alongside the .git repo
@@ -40,8 +41,8 @@ class Gitit:
       hold_file = os.path.join(ticket_dir, it.HOLD_FILE)
       misc.mkdirs(ticket_dir)
       misc.write_file_contents(hold_file, \
-               'This is merely placeholder file for git-it that prevents ' + \
-               'this directory from\nbeing pruned by Git.')
+             'This is merely a placeholder file for git-it that prevents ' + \
+             'this directory from\nbeing pruned by Git.')
 
       # Commit the new itdb to the repo
       curr_branch = git.current_branch()
@@ -108,8 +109,7 @@ class Gitit:
       log.printerr(e)
 
   def show(self, sha):
-    match = self.match_or_error(sha)
-    i = issue.create_from_file(match)
+    i, match = self.get_ticket(sha)
     i.print_ticket()
 
   def new(self):
