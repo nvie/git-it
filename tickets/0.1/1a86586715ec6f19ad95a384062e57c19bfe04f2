@@ -1,6 +1,6 @@
 Subject: Automatically commit new tickets to Git repo
 Issuer: Vincent Driessen <vincent@datafox.nl>
-Date: 2009-05-20 10:09:49.538693
+Date: 2009-05-20 10:09:49
 Type: feature
 Priority: 3
 Status: fixed

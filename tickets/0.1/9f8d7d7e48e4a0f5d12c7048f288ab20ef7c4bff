@@ -1,6 +1,6 @@
 Subject: Implement the 'it sync' subcommand, to pull/push changes with an upstream repo
 Issuer: Vincent Driessen <vincent@datafox.nl>
-Date: 2009-05-20 06:59:08.895065
+Date: 2009-05-20 06:59:08
 Type: feature
 Priority: 3
 Status: open

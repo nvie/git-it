@@ -1,6 +1,6 @@
 Subject: Show color output only if the TTY supports it
 Issuer: Vincent Driessen <vincent@datafox.nl>
-Date: 2009-05-19 07:29:57.662690
+Date: 2009-05-19 07:29:57
 Type: issue
 Priority: 2
 Status: open
