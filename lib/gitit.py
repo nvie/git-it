@@ -53,7 +53,9 @@ class Gitit:
       os.remove(hold_file)
       os.rmdir(ticket_dir)
       git.change_head_branch(curr_branch)
-      misc.rmdirs(os.path.join(repo.find_root(), it.TICKET_DIR))
+      abs_ticket_dir = os.path.join(repo.find_root(), it.TICKET_DIR)
+      git.command_lines('reset', ['HEAD', abs_ticket_dir])
+      misc.rmdirs(abs_ticket_dir)
       print 'Initialized empty ticket database.'
 
   def match_or_error(self, sha):
@@ -78,15 +80,39 @@ class Gitit:
       return os.path.join(it.TICKET_DIR, matches[0])
 
   def edit(self, sha):
-    match = self.match_or_error(sha)
-    _, basename = os.path.split(match)
-    sha7 = misc.chop(basename, 7)
-    if os.system('vim "%s"' % match) == 0:
-      # TODO: Add a check here to assert validity of the edit
-      print 'ticket \'%s\' edited succesfully' % sha7
-      self.list()
+    i, rel, fullsha, match = self.get_ticket(sha)
+    sha7 = misc.chop(fullsha, 7)
+
+    # Save the contents of this ticket to a file, so it can be edited
+    i.save(it.EDIT_TMP_FILE)
+    timestamp1 = os.path.getmtime(it.EDIT_TMP_FILE)
+    success = os.system('vim "%s"' % it.EDIT_TMP_FILE) == 0
+    timestamp2 = os.path.getmtime(it.EDIT_TMP_FILE)
+    if success:
+      if timestamp1 < timestamp2:
+        i = issue.create_from_file(it.EDIT_TMP_FILE, fullsha, rel)
+
+        # Now, when the edit has succesfully taken place, switch branches, commit,
+        # and switch back
+        curr_branch = git.current_branch()
+        git.change_head_branch('git-it')
+        msg = 'ticket \'%s\' edited' % sha7
+        i.save()
+        git.command_lines('commit', ['-m', msg, i.filename()])
+        git.change_head_branch(curr_branch)
+        abs_ticket_dir = os.path.join(repo.find_root(), it.TICKET_DIR)
+        git.command_lines('reset', ['HEAD', abs_ticket_dir])
+        misc.rmdirs(abs_ticket_dir)
+        print 'ticket \'%s\' edited succesfully' % sha7
+        print ''
+        self.list()
+      else:
+        print 'editing of ticket \'%s\' cancelled' % sha7
     else:
       log.printerr('editing of ticket \'%s\' failed' % sha7)
+
+    # Remove the temporary file
+    os.remove(it.EDIT_TMP_FILE)
 
   def mv(self, sha, to_rel):
     match = self.match_or_error(sha)
@@ -103,6 +129,7 @@ class Gitit:
     try:
       os.rename(match, os.path.join(to_rel_abs, basename))
       print 'ticket \'%s\' moved to release \'%s\'' % (sha7, to_rel)
+      print ''
       self.list()
     except OSError, e:
       log.printerr('could not move ticket \'%s\' to \'%s\':' % (sha7, to_rel))
@@ -140,7 +167,9 @@ class Gitit:
     os.remove(i.filename())
     git.command_lines('rm', ['--cached', i.filename()])
     git.change_head_branch(curr_branch)
-    misc.rmdirs(os.path.join(repo.find_root(), it.TICKET_DIR))
+    abs_ticket_dir = os.path.join(repo.find_root(), it.TICKET_DIR)
+    git.command_lines('reset', ['HEAD', abs_ticket_dir])
+    misc.rmdirs(abs_ticket_dir)
     return i
 
   def progress_bar(self, percentage_done, width = 32):
@@ -206,7 +235,9 @@ class Gitit:
     msg = 'removed ticket \'%s\'' % sha7
     git.command_lines('commit', ['-m', msg, match])
     git.change_head_branch(curr_branch)
-    misc.rmdirs(os.path.join(repo.find_root(), it.TICKET_DIR))
+    abs_ticket_dir = os.path.join(repo.find_root(), it.TICKET_DIR)
+    git.command_lines('reset', ['HEAD', abs_ticket_dir])
+    misc.rmdirs(abs_ticket_dir)
     print 'ticket \'%s\' removed'% sha7
 
   def get_ticket(self, sha):
@@ -234,8 +265,11 @@ class Gitit:
     i.save()
     git.command_lines('commit', ['-m', msg, match])
     git.change_head_branch(curr_branch)
-    misc.rmdirs(os.path.join(repo.find_root(), it.TICKET_DIR))
+    abs_ticket_dir = os.path.join(repo.find_root(), it.TICKET_DIR)
+    git.command_lines('reset', ['HEAD', abs_ticket_dir])
+    misc.rmdirs(abs_ticket_dir)
     print 'ticket \'%s\' %s' % (sha7, new_status)
+    print ''
     self.list()
 
   def reopen_ticket(self, sha):
@@ -254,8 +288,11 @@ class Gitit:
     i.save()
     git.command_lines('commit', ['-m', msg, match])
     git.change_head_branch(curr_branch)
-    misc.rmdirs(os.path.join(repo.find_root(), it.TICKET_DIR))
+    abs_ticket_dir = os.path.join(repo.find_root(), it.TICKET_DIR)
+    git.command_lines('reset', ['HEAD', abs_ticket_dir])
+    misc.rmdirs(abs_ticket_dir)
     print 'ticket \'%s\' reopened' % sha7
+    print ''
     self.list()
 
 

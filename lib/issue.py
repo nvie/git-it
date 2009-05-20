@@ -98,14 +98,26 @@ def create_from_string(content, id = None, release = None):
   lines = content.split(os.linesep)
   return create_from_lines(lines, id, release)
 
-def create_from_file(filename):
-  dir, id = os.path.split(filename)
-  _, release = os.path.split(dir)
-  content = misc.read_file_content(filename, id, release)
+def create_from_file(filename, overwrite_id = None, overwrite_release = None):
+  if (overwrite_id and not overwrite_release) or (overwrite_release and not overwrite_id):
+    log.printerr('program error: specify both an alternative ID and alternative release or neither')
+    return
+
+  if overwrite_id:
+    id = overwrite_id
+  else:
+    dir, id = os.path.split(filename)
+
+  if overwrite_release:
+    release = overwrite_release
+  else:
+    _, release = os.path.split(dir)
+
+  content = misc.read_file_contents(filename)
   if not content:
     return None
   else:
-    return create_from_content(content)
+    return create_from_string(content, id, release)
 
 
 class Issue:
@@ -196,7 +208,7 @@ class Issue:
 
     # Write the file
     dir, _ = os.path.split(file)
-    if not os.path.isdir(dir):
+    if dir and not os.path.isdir(dir):
       misc.mkdirs(dir)
     f = open(file, 'w')
     try:
