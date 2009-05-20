@@ -95,7 +95,7 @@ def create_from_lines(array_with_lines, id = None, release = None):
   return i
 
 def create_from_string(content, id = None, release = None):
-  lines = content.split('\n')
+  lines = content.split(os.linesep)
   return create_from_lines(lines, id, release)
 
 def create_from_file(filename):
