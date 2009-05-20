@@ -6,6 +6,8 @@ import repo
 import log
 import it
 
+DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+
 # Helper functions for asking interactive input
 def not_empty(s):
   return s.strip() != ''
@@ -75,9 +77,7 @@ def create_from_lines(array_with_lines, id = None, release = None):
   i.title = ticket['Subject']
   i.type = ticket['Type']
   i.issuer = ticket['Issuer']
-  # TODO: Implement
-  #i.date = ticket['Date']
-  i.date = datetime.datetime.now()
+  i.date = datetime.datetime.strptime(ticket['Date'], DATE_FORMAT)
   i.body = ticket[None]
   i.prio = ticket['Priority']
   i.status = ticket['Status']
@@ -152,7 +152,7 @@ class Issue:
   def __str__(self):
     headers = [ 'Subject: %s'     % self.title,
                 'Issuer: %s'      % self.issuer,
-                'Date: %s'        % self.date,
+                'Date: %s'        % self.date.strftime(DATE_FORMAT),
                 'Type: %s'        % self.type,
                 'Priority: %s'    % self.prio,
                 'Status: %s'      % self.status,
@@ -192,7 +192,7 @@ class Issue:
   def save(self, file = None):
     headers = [ 'Subject: %s'     % self.title,
                 'Issuer: %s'      % self.issuer,
-                'Date: %s'        % self.date,
+                'Date: %s'        % self.date.strftime(DATE_FORMAT),
                 'Type: %s'        % self.type,
                 'Priority: %s'    % self.prio,
                 'Status: %s'      % self.status,

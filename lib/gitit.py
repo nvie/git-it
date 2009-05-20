@@ -3,6 +3,15 @@ import datetime
 import sha
 import misc, repo, log, issue, colors, git, it
 
+def cmp_date(d1, d2):
+  if d1 < d2:
+    return -1
+  elif d1 > d2:
+    return 1
+  else:
+    return 0
+
+
 class Gitit:
   def __init__(self):
     pass
@@ -209,8 +218,13 @@ class Gitit:
       else:
         print release_line
 
+      # First, filter all types that do not need to be shown out of the list
       tickets_to_print = filter(lambda t: t.status in show_types, tickets)
       if len(tickets_to_print) > 0:
+        # Then, sort the tickets by date modified
+        tickets_to_print.sort(lambda x, y: cmp_date(x.date, y.date))
+
+        # ...and finally, print them
         print colors.colors['blue-on-white'] + 'id      type    title                                                        status   date   assigned-to' + colors.colors['default']
         #TODO: in case of no color support, we should print a line instead
         #print '------- ------- ---------------------------------------------------------------------- -------- ------ --------------------------------'
