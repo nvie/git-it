@@ -1,8 +1,8 @@
-Subject: Support moving tickets to other milestones remotely with 'it mv'
+Subject: Support 'it mv' subcommand with remote itdb
 Issuer: Vincent Driessen <vincent@datafox.nl>
 Date: 2009-05-19 13:19:29
 Type: feature
-Priority: 2
+Priority: 1
 Status: open
 Assigned to: -
 
