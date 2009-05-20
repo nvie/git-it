@@ -3,7 +3,12 @@ import datetime
 import colors
 import misc
 import repo
+import log
+import it
 
+DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+
+# Helper functions for asking interactive input
 def not_empty(s):
   return s.strip() != ''
 
@@ -14,6 +19,10 @@ def ask_for_pattern(message, pattern = None):
       input = raw_input(message)
   return input
 
+
+#
+# Helper functions for creating new tickets interactively or from file
+#
 def create_interactive():
   # First, do some checks to error early
   fullname = os.popen('git config user.name').read().strip()
@@ -46,20 +55,81 @@ def create_interactive():
   i.issuer = '%s <%s>' % (fullname, email)
   return i
 
-def file_as_dict(filename):
-  """
-  Read a file as a series of lines representing dictionary entries in the
-  format of "key: value" (that is: key, colon, value)
-  """
+def create_from_lines(array_with_lines, id = None, release = None):
+  # Create an empty ticket
+  i = Issue()
+
+  # Parse the lines
+  ticket = {}
+  ticket[None] = ''
+  for line in array_with_lines:
+    if line.strip() == '' or line[0] == '#':
+      continue
+    pos = line.find(':')
+    if pos >= 0:
+      key = line[:pos].strip()
+      val = line[pos+1:].strip()
+      ticket[key] = val
+    else:
+      ticket[None] += line + os.linesep
+
+  # Now, set the ticket fields
+  i.title = ticket['Subject']
+  i.type = ticket['Type']
+  i.issuer = ticket['Issuer']
+  i.date = datetime.datetime.strptime(ticket['Date'], DATE_FORMAT)
+  i.body = ticket[None]
+  i.prio = int(ticket['Priority'])
+  i.status = ticket['Status']
+  i.assigned_to = ticket['Assigned to']
+
+  # Properties that are not part of the content, but of the location of the file
+  # These properties may be overwritten by the caller, else we will use defaults
+  if id:
+    i.id = id
+
+  if i.release:
+    i.release = release
+
+  # Return the new ticket
+  return i
+
+def create_from_string(content, id = None, release = None):
+  lines = content.split(os.linesep)
+  return create_from_lines(lines, id, release)
+
+def create_from_file(filename, overwrite_id = None, overwrite_release = None):
+  if (overwrite_id and not overwrite_release) or (overwrite_release and not overwrite_id):
+    log.printerr('program error: specify both an alternative ID and alternative release or neither')
+    return
+
+  if overwrite_id:
+    id = overwrite_id
+  else:
+    dir, id = os.path.split(filename)
+
+  if overwrite_release:
+    release = overwrite_release
+  else:
+    _, release = os.path.split(dir)
+
+  content = misc.read_file_contents(filename)
+  if not content:
+    return None
+  else:
+    return create_from_string(content, id, release)
+
 
 class Issue:
-  # How each status is visually printed
+  # Private fields
+  prio_names = [ 'high', 'medium', 'low' ]
+  prio_colors = { 'high': 'red-on-white', 'medium': 'yellow-on-white', 'low': 'white' }
   status_colors = { 'open': 'bold', \
                     'closed': 'default', \
-	'rejected': 'red-on-white', \
-	'fixed': 'green-on-white' }
+                    'rejected': 'red-on-white', \
+                    'fixed': 'green-on-white' }
 
-  def __init__(self, ticket_file = None):
+  def __init__(self):
     self.title = ''
     self.type = 'issue'
     self.issuer = ''
@@ -71,55 +141,23 @@ class Issue:
     self.assigned_to = '-'
     self.release = 'uncategorized'
 
-    # Now, read the ticket file if given
-    if ticket_file is not None:
-      f = open(ticket_file, 'r')
-      ticket = {}
-      ticket[None] = ''
-      try:
-        lines = f.read().split('\n')
-        for line in lines:
-          if line.strip() == '' or line[0] == '#':
-            continue
-          pos = line.find(':')
-          if pos >= 0:
-            key = line[:pos].strip()
-            val = line[pos+1:].strip()
-            ticket[key] = val
-          else:
-            ticket[None] += line + os.linesep
-      finally:
-        f.close()
-
-      self.title = ticket['Subject']
-      self.type = ticket['Type']
-      self.issuer = ticket['Issuer']
-      # TODO: Implement
-      #self.date = ticket['Date']
-      self.date = datetime.datetime.now()
-      self.body = ticket[None]
-      self.prio = ticket['Priority']
-      self.status = ticket['Status']
-      self.assigned_to = ticket['Assigned to']
-      dir, self.id = os.path.split(ticket_file)
-      _, self.release = os.path.split(dir)
-
-  def oneline(self, lineno = None):
+  def oneline(self):
     date = '%s/%s' % (self.date.month, self.date.day)
     subject = '%s%-60s%s' % (colors.colors[self.status_colors[self.status]], misc.chop(self.title, 60, '..'), colors.colors['default'])
     status = '%s%-8s%s' % (colors.colors[self.status_colors[self.status]], misc.chop(self.status, 8), colors.colors['default'])
-    return '%-7s %-7s %s %s %-6s %-32s' % \
+    priostr = self.prio_names[self.prio-1]
+    prio = '%s%-8s%s' % (colors.colors[self.prio_colors[priostr]], priostr, colors.colors['default'])
+    return '%-7s %-7s %s %s %-6s %s' % \
            (misc.chop(self.id, 7),
             misc.chop(self.type, 7), subject, status,
-            date, misc.chop(self.assigned_to, 32, '..'),
-           )
+            date, prio)
 
   def __str__(self):
     headers = [ 'Subject: %s'     % self.title,
                 'Issuer: %s'      % self.issuer,
-                'Date: %s'        % self.date,
+                'Date: %s'        % self.date.strftime(DATE_FORMAT),
                 'Type: %s'        % self.type,
-                'Priority: %s'    % self.prio,
+                'Priority: %d'    % self.prio,
                 'Status: %s'      % self.status,
                 'Assigned to: %s' % self.assigned_to,
                 'Release: %s'     % self.release,
@@ -136,7 +174,9 @@ class Issue:
     print '%s%s:%s %s%s%s' % (colors.colors[color_field], field, colors.colors['default'], \
                               colors.colors[color_value], value, colors.colors['default'])
 
-  def print_ticket(self):
+  def print_ticket(self, fullsha = None):
+    if fullsha:
+      self.print_ticket_field('Ticket', fullsha)
     self.print_ticket_field('Subject', self.title)
     self.print_ticket_field('Issuer', self.issuer)
     self.print_ticket_field('Date', self.date)
@@ -149,20 +189,15 @@ class Issue:
     print self.body
 
   def filename(self):
-    itdb = repo.find_itdb()
-    if not itdb:
-      log.printerr('Issue database not yet initialized')
-      log.printerr('Run \'it init\' to initialize now')
-      return
-    file = os.path.join(itdb, 'tickets', self.release, self.id)
+    file = os.path.join(it.TICKET_DIR, self.release, self.id)
     return file
 
   def save(self, file = None):
     headers = [ 'Subject: %s'     % self.title,
                 'Issuer: %s'      % self.issuer,
-                'Date: %s'        % self.date,
+                'Date: %s'        % self.date.strftime(DATE_FORMAT),
                 'Type: %s'        % self.type,
-                'Priority: %s'    % self.prio,
+                'Priority: %d'    % self.prio,
                 'Status: %s'      % self.status,
                 'Assigned to: %s' % self.assigned_to,
                 '',
@@ -176,11 +211,12 @@ class Issue:
 
     # Write the file
     dir, _ = os.path.split(file)
-    if not os.path.isdir(dir):
+    if dir and not os.path.isdir(dir):
       misc.mkdirs(dir)
     f = open(file, 'w')
     try:
       f.write(contents)
     finally:
       f.close
+
 
