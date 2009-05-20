@@ -109,8 +109,8 @@ class Gitit:
       log.printerr(e)
 
   def show(self, sha):
-    i, match = self.get_ticket(sha)
-    i.print_ticket()
+    i, _, fullsha, _ = self.get_ticket(sha)
+    i.print_ticket(fullsha)
 
   def new(self):
     self.require_itdb()
@@ -212,15 +212,15 @@ class Gitit:
   def get_ticket(self, sha):
     match = self.match_or_error(sha)
     contents = git.cat_file(it.ITDB_BRANCH + ':' + match)
-    parent, basename = os.path.split(match)
+    parent, fullsha = os.path.split(match)
     rel = os.path.basename(parent)
-    sha7 = misc.chop(basename, 7)
-    i = issue.create_from_lines(contents, basename, rel)
-    return (i, match)
+    sha7 = misc.chop(fullsha, 7)
+    i = issue.create_from_lines(contents, fullsha, rel)
+    return (i, rel, fullsha, match)
 
   def finish_ticket(self, sha, new_status):
-    sha7 = misc.chop(sha, 7)
-    i, match = self.get_ticket(sha)
+    i, _, fullsha, match = self.get_ticket(sha)
+    sha7 = misc.chop(fullsha, 7)
     if i.status != 'open':
       log.printerr('ticket \'%s\' already %s' % (sha7, i.status))
       sys.exit(1)
@@ -239,8 +239,8 @@ class Gitit:
     self.list()
 
   def reopen_ticket(self, sha):
+    i, _, fullsha, match = self.get_ticket(sha)
     sha7 = misc.chop(sha, 7)
-    i, match = self.get_ticket(sha)
     if i.status == 'open':
       log.printerr('ticket \'%s\' already open' % sha7)
       sys.exit(1)

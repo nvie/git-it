@@ -159,7 +159,9 @@ class Issue:
     print '%s%s:%s %s%s%s' % (colors.colors[color_field], field, colors.colors['default'], \
                               colors.colors[color_value], value, colors.colors['default'])
 
-  def print_ticket(self):
+  def print_ticket(self, fullsha = None):
+    if fullsha:
+      self.print_ticket_field('Ticket', fullsha)
     self.print_ticket_field('Subject', self.title)
     self.print_ticket_field('Issuer', self.issuer)
     self.print_ticket_field('Date', self.date)
