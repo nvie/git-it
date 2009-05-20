@@ -145,8 +145,13 @@ class Issue:
     date = '%s/%s' % (self.date.month, self.date.day)
     subject = '%s%-60s%s' % (colors.colors[self.status_colors[self.status]], misc.chop(self.title, 60, '..'), colors.colors['default'])
     status = '%s%-8s%s' % (colors.colors[self.status_colors[self.status]], misc.chop(self.status, 8), colors.colors['default'])
-    priostr = self.prio_names[self.prio-1]
-    prio = '%s%-8s%s' % (colors.colors[self.prio_colors[priostr]], priostr, colors.colors['default'])
+
+    # Hide the prio field in case of a closed ticket
+    if self.status == 'open':
+      priostr = self.prio_names[self.prio-1]
+      prio = '%s%-8s%s' % (colors.colors[self.prio_colors[priostr]], priostr, colors.colors['default'])
+    else:
+      prio = '%-8s' % '-'
     return '%-7s %-7s %s %s %-6s %s' % \
            (misc.chop(self.id, 7),
             misc.chop(self.type, 7), subject, status,
