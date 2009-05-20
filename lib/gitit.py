@@ -3,13 +3,23 @@ import datetime
 import sha
 import misc, repo, log, issue, colors, git, it
 
-def cmp_date(d1, d2):
-  if d1 < d2:
+def cmp_by_prio(t1, t2):
+  return cmp(t1.prio, t2.prio)
+
+def cmp_by_date(t1, t2):
+  if t1.date < t2.date:
     return -1
-  elif d1 > d2:
+  elif t1.date > t2.date:
     return 1
   else:
     return 0
+
+def cmp_by_prio_then_date(ticket1, ticket2):
+  v = cmp_by_prio(ticket1, ticket2)
+  if v == 0:
+    return cmp_by_date(ticket1, ticket2)
+  else:
+    return v
 
 
 class Gitit:
@@ -222,7 +232,7 @@ class Gitit:
       tickets_to_print = filter(lambda t: t.status in show_types, tickets)
       if len(tickets_to_print) > 0:
         # Then, sort the tickets by date modified
-        tickets_to_print.sort(lambda x, y: cmp_date(x.date, y.date))
+        tickets_to_print.sort(cmp_by_prio_then_date)
 
         # ...and finally, print them
         print colors.colors['blue-on-white'] + 'id      type    title                                                        status   date   priority' + colors.colors['default']
