@@ -1,9 +1,9 @@
 Subject: Make the progress bars show the relative effort that has been done
 Issuer: Vincent Driessen <vincent@datafox.nl>
-Date: 2009-05-20 09:18:25.886239
+Date: 2009-05-20 10:05:33.059332
 Type: feature
 Priority: 3
-Status: open
+Status: fixed
 Assigned to: -
 
 Every ticket should get a relative weight set (major change, minor change,
