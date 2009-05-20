@@ -67,7 +67,11 @@ if subcmd == 'init':
 elif subcmd == 'new':
   g.new()
 elif subcmd == 'list':
-  g.list()
+  types = ['open']
+  if len(params) > 0:
+    if params[0] == '-a':
+      types += [ 'closed', 'fixed', 'rejected' ]
+  g.list(types)
 elif subcmd == 'edit':
   if len(params) != 1:
     log.printerr('usage: it edit <id>')

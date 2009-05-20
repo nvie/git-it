@@ -151,7 +151,7 @@ class Gitit:
            colors.colors['default'] + format_string_togo + '] %d%%' % \
            int(percentage_done * 100)
 
-  def list(self):
+  def list(self, show_types = ['open']):
     self.require_itdb()
     releasedirs = filter(lambda x: x[1] == 'tree', git.tree(it.ITDB_BRANCH + \
                                                          ':' + it.TICKET_DIR))
@@ -159,6 +159,7 @@ class Gitit:
       print 'no tickets yet. use \'it new\' to add new tickets.'
       return
 
+    print_count = 0
     for _, _, sha, rel in releasedirs:
       reldir = os.path.join(it.TICKET_DIR, rel)
       ticketfiles = git.tree(it.ITDB_BRANCH + ':' + reldir)
@@ -179,15 +180,20 @@ class Gitit:
       else:
         print release_line
 
-      if len(tickets) > 0:
+      tickets_to_print = filter(lambda t: t.status in show_types, tickets)
+      if len(tickets_to_print) > 0:
         print colors.colors['blue-on-white'] + 'id      type    title                                                        status   date   assigned-to' + colors.colors['default']
         #TODO: in case of no color support, we should print a line instead
         #print '------- ------- ---------------------------------------------------------------------- -------- ------ --------------------------------'
-        for ticket in tickets:
+        for ticket in tickets_to_print:
+          print_count += 1
           print ticket.oneline()
       else:
-        print 'no tickets'
+        print 'no open tickets for this milestone'
       print ''
+
+    if print_count == 0:
+      print 'use the -a flag to show all tickets'
 
   def rm(self, sha):
     match = self.match_or_error(sha)
