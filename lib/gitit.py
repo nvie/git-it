@@ -225,9 +225,9 @@ class Gitit:
         tickets_to_print.sort(lambda x, y: cmp_date(x.date, y.date))
 
         # ...and finally, print them
-        print colors.colors['blue-on-white'] + 'id      type    title                                                        status   date   assigned-to' + colors.colors['default']
+        print colors.colors['blue-on-white'] + 'id      type    title                                                        status   date   priority' + colors.colors['default']
         #TODO: in case of no color support, we should print a line instead
-        #print '------- ------- ---------------------------------------------------------------------- -------- ------ --------------------------------'
+        #print '------- ------- ---------------------------------------------------------------------- -------- --------- --------'
         for ticket in tickets_to_print:
           print_count += 1
           print ticket.oneline()

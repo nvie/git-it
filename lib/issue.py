@@ -79,7 +79,7 @@ def create_from_lines(array_with_lines, id = None, release = None):
   i.issuer = ticket['Issuer']
   i.date = datetime.datetime.strptime(ticket['Date'], DATE_FORMAT)
   i.body = ticket[None]
-  i.prio = ticket['Priority']
+  i.prio = int(ticket['Priority'])
   i.status = ticket['Status']
   i.assigned_to = ticket['Assigned to']
 
@@ -122,10 +122,12 @@ def create_from_file(filename, overwrite_id = None, overwrite_release = None):
 
 class Issue:
   # Private fields
+  prio_names = [ 'high', 'medium', 'low' ]
+  prio_colors = { 'high': 'red-on-white', 'medium': 'yellow-on-white', 'low': 'white' }
   status_colors = { 'open': 'bold', \
                     'closed': 'default', \
-	'rejected': 'red-on-white', \
-	'fixed': 'green-on-white' }
+                    'rejected': 'red-on-white', \
+                    'fixed': 'green-on-white' }
 
   def __init__(self):
     self.title = ''
@@ -143,18 +145,19 @@ class Issue:
     date = '%s/%s' % (self.date.month, self.date.day)
     subject = '%s%-60s%s' % (colors.colors[self.status_colors[self.status]], misc.chop(self.title, 60, '..'), colors.colors['default'])
     status = '%s%-8s%s' % (colors.colors[self.status_colors[self.status]], misc.chop(self.status, 8), colors.colors['default'])
-    return '%-7s %-7s %s %s %-6s %-32s' % \
+    priostr = self.prio_names[self.prio-1]
+    prio = '%s%-8s%s' % (colors.colors[self.prio_colors[priostr]], priostr, colors.colors['default'])
+    return '%-7s %-7s %s %s %-6s %s' % \
            (misc.chop(self.id, 7),
             misc.chop(self.type, 7), subject, status,
-            date, misc.chop(self.assigned_to, 32, '..'),
-           )
+            date, prio)
 
   def __str__(self):
     headers = [ 'Subject: %s'     % self.title,
                 'Issuer: %s'      % self.issuer,
                 'Date: %s'        % self.date.strftime(DATE_FORMAT),
                 'Type: %s'        % self.type,
-                'Priority: %s'    % self.prio,
+                'Priority: %d'    % self.prio,
                 'Status: %s'      % self.status,
                 'Assigned to: %s' % self.assigned_to,
                 'Release: %s'     % self.release,
@@ -194,7 +197,7 @@ class Issue:
                 'Issuer: %s'      % self.issuer,
                 'Date: %s'        % self.date.strftime(DATE_FORMAT),
                 'Type: %s'        % self.type,
-                'Priority: %s'    % self.prio,
+                'Priority: %d'    % self.prio,
                 'Status: %s'      % self.status,
                 'Assigned to: %s' % self.assigned_to,
                 '',
