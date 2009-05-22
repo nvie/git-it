@@ -6,3 +6,5 @@ Priority: 1
 Status: open
 Assigned to: -
 
+When typing the following text "For example<colon here> do this", it show
+removes the full line, thinking it's another header field
