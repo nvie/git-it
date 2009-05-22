@@ -6,3 +6,6 @@ Priority: 2
 Status: open
 Assigned to: -
 
+	it list -b	should show open bugs only;
+	it list -f	should show all features, etc.;
+	it list -ba	should show all bugs, including closed ones.
