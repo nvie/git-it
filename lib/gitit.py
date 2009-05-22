@@ -231,6 +231,9 @@ class Gitit:
     i, _, fullsha, _ = self.get_ticket(sha)
     i.print_ticket(fullsha)
   
+  def sync(self):
+    print 'TODO: implement'
+  
   def new(self):
     self.require_itdb()
 
@@ -491,4 +494,5 @@ class Gitit:
     print 'ticket \'%s\' taken' % sha7
     print ''
     self.list()
+  
 
