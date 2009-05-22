@@ -6,3 +6,14 @@ Priority: 1
 Status: open
 Assigned to: -
 
+The sync procedure should be somewhat like the following workflow
+- SYNC_WITH = raw_input('Sync with who? ')
+- git fetch $SYNC_WITH git-it
+- CURR_BRANCH = ?
+- git stash save --keep-index 'stashed temporarily by git-it to sync git-it branch'
+- git co git-it
+- git merge $SYNC_WITH/git-it
+- git mergetool
+- git push $SYNC_WITH git-it
+- git co $CURR_BRANCH
+- git stash pop
