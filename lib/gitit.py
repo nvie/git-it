@@ -1,7 +1,7 @@
 import sys, os
 import datetime
 import sha
-import misc, repo, log, issue, colors, git, it
+import misc, repo, log, ticket, colors, git, it
 
 def cmp_by_prio(t1, t2):
   return cmp(t1.prio, t2.prio)
@@ -109,7 +109,7 @@ class Gitit:
     timestamp2 = os.path.getmtime(it.EDIT_TMP_FILE)
     if success:
       if timestamp1 < timestamp2:
-        i = issue.create_from_file(it.EDIT_TMP_FILE, fullsha, rel)
+        i = ticket.create_from_file(it.EDIT_TMP_FILE, fullsha, rel)
 
         # Now, when the edit has succesfully taken place, switch branches, commit,
         # and switch back
@@ -182,7 +182,7 @@ class Gitit:
     self.require_itdb()
 
     # Create a fresh ticket
-    i = issue.create_interactive()
+    i = ticket.create_interactive()
 
     # Generate a SHA1 id
     s = sha.new()
@@ -231,7 +231,7 @@ class Gitit:
     for _, _, sha, rel in releasedirs:
       reldir = os.path.join(it.TICKET_DIR, rel)
       ticketfiles = git.tree(it.ITDB_BRANCH + ':' + reldir)
-      tickets = [ issue.create_from_lines(git.cat_file(sha), ticket_id, rel) \
+      tickets = [ ticket.create_from_lines(git.cat_file(sha), ticket_id, rel) \
                   for _, type, sha, ticket_id in ticketfiles \
                   if type == 'blob' and ticket_id != it.HOLD_FILE \
                 ]
@@ -260,9 +260,9 @@ class Gitit:
                                                '                         s' + \
                                                'tatus   date   priority'    + \
                                                colors.colors['default']
-        for ticket in tickets_to_print:
+        for t in tickets_to_print:
           print_count += 1
-          print ticket.oneline()
+          print t.oneline()
       else:
         print 'no open tickets for this milestone'
       print ''
@@ -292,7 +292,7 @@ class Gitit:
     parent, fullsha = os.path.split(match)
     rel = os.path.basename(parent)
     sha7 = misc.chop(fullsha, 7)
-    i = issue.create_from_lines(contents, fullsha, rel)
+    i = ticket.create_from_lines(contents, fullsha, rel)
     return (i, rel, fullsha, match)
   
   def finish_ticket(self, sha, new_status):

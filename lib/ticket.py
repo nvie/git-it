@@ -34,7 +34,7 @@ def create_interactive():
     log.printerr('author name not set. use "git config [--global] user.name \'John Smith\'" to set the fullname')
     return
 
-  i = Issue()
+  i = Ticket()
   i.title = ask_for_pattern('Title: ', not_empty)
 
   type_dict = { 'i': 'issue', 't': 'task', 'f': 'feature', 'b': 'bug' }
@@ -57,7 +57,7 @@ def create_interactive():
 
 def create_from_lines(array_with_lines, id = None, release = None):
   # Create an empty ticket
-  i = Issue()
+  i = Ticket()
 
   # Parse the lines
   ticket = {}
@@ -120,7 +120,7 @@ def create_from_file(filename, overwrite_id = None, overwrite_release = None):
     return create_from_string(content, id, release)
 
 
-class Issue:
+class Ticket:
   # Private fields
   prio_names = [ 'high', 'medium', 'low' ]
   prio_colors = { 'high': 'red-on-white', 'medium': 'yellow-on-white', 'low': 'white' }
