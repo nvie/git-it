@@ -6,3 +6,4 @@ Priority: 1
 Status: open
 Assigned to: -
 
+We really should use the absolute path (using repo.find_root()) first.
