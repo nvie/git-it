@@ -8,6 +8,13 @@ import it
 
 DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 
+def parse_datetime_string(dt):
+	dt = dt.strip()
+	date, time = dt.split(' ')
+	year, month, day = date.split('-', 2)
+	hour, minute, second = time.split(':', 2)
+	return datetime.datetime(int(year), int(month), int(day), int(hour), int(minute), int(second))
+
 # Helper functions for asking interactive input
 def not_empty(s):
   return s.strip() != ''
@@ -77,7 +84,7 @@ def create_from_lines(array_with_lines, id = None, release = None):
   i.title = ticket['Subject']
   i.type = ticket['Type']
   i.issuer = ticket['Issuer']
-  i.date = datetime.datetime.strptime(ticket['Date'], DATE_FORMAT)
+  i.date = parse_datetime_string(ticket['Date'])
   i.body = ticket[None]
   i.prio = int(ticket['Priority'])
   i.status = ticket['Status']
