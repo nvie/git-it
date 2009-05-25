@@ -215,7 +215,7 @@ class Gitit:
     blocks_done = int(percentage_done * 1.0 * width)
     format_string_done = ('%%-%ds' % blocks_done) % ''
     format_string_togo = ('%%-%ds' % (width - blocks_done)) % ''
-    return '[' + colors.colors['green'] + format_string_done + \
+    return '[' + colors.colors['black-on-green'] + format_string_done + \
            colors.colors['default'] + format_string_togo + '] %d%%' % \
            int(percentage_done * 100)
   

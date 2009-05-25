@@ -14,6 +14,7 @@ colors = { 'default' : '\x1b[01;0m',
            'blue-on-white' : '\x1b[01;34m',
            'white-on-red' : '\x1b[01;06;37;41m',
            'red-on-black' : '\x1b[01;41;7;3m',
-           'black-on-red' : '\x1b[01;101m'
+           'black-on-red' : '\x1b[01;101m',
+           'black-on-green' : '\x1b[01;102m'
          }
 
