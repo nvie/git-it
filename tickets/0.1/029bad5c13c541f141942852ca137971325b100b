@@ -6,3 +6,6 @@ Priority: 2
 Status: open
 Assigned to: -
 
+In the 'it list -a' overview, we can keep showing the status normally. In case
+of an 'open' ticket, we may show 'open - high', or 'open - medium', indicating
+priority.
