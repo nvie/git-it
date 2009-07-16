@@ -182,7 +182,12 @@ class Gitit:
     self.require_itdb()
 
     # Create a fresh ticket
-    i = ticket.create_interactive()
+    try:
+      i = ticket.create_interactive()
+    except KeyboardInterrupt:
+      print ''
+      print 'aborting new ticket'
+      return None
 
     # Generate a SHA1 id
     s = sha.new()
