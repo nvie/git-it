@@ -244,13 +244,15 @@ class Gitit:
 
       # Show a progress bar only when there are items in this release
       if total > 0:
-        print release_line + self.progress_bar(done / total)
+        header = release_line + self.progress_bar(done / total)
       else:
-        print release_line
+        header = release_line
 
       # First, filter all types that do not need to be shown out of the list
       tickets_to_print = filter(lambda t: t.status in show_types, tickets)
       if len(tickets_to_print) > 0:
+        print header
+
         # Then, sort the tickets by date modified
         tickets_to_print.sort(cmp_by_prio_then_date)
 
@@ -263,9 +265,11 @@ class Gitit:
         for t in tickets_to_print:
           print_count += 1
           print t.oneline()
+
+        print ''
       else:
-        print 'no open tickets for this milestone'
-      print ''
+        #print 'no open tickets for this milestone'
+        pass
 
     if print_count == 0:
       print 'use the -a flag to show all tickets'
