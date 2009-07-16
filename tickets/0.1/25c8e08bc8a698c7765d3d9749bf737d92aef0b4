@@ -6,3 +6,9 @@ Priority: 3
 Status: open
 Assigned to: -
 
+In fact, this can even be dynamically determined.
+Either of the commands below give the result...
+  stty size
+or
+  tput cols
+  tput lines
