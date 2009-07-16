@@ -314,8 +314,8 @@ class Gitit:
     # and switch back
     curr_branch = git.current_branch()
     git.change_head_branch('git-it')
-    msg = '%s ticket \'%s\'' % (i.status, sha7)
     i.status = new_status
+    msg = '%s ticket \'%s\'' % (i.status, sha7)
     i.save()
     git.command_lines('commit', ['-m', msg, match])
     git.change_head_branch(curr_branch)
