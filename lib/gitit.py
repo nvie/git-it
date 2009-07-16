@@ -262,14 +262,25 @@ class Gitit:
         tickets_to_print.sort(cmp_by_prio_then_date)
 
         # ...and finally, print them
-        print colors.colors['blue-on-white'] + 'id      type    title     ' + \
-                                               '                          ' + \
-                                               '                         s' + \
-                                               'tatus   date   priority'    + \
-                                               colors.colors['default']
+        hide_status = show_types == [ 'open' ]
+        cols = [ 'id     ',                                                      \
+                 'type   ',                                                      \
+               ]
+        if not hide_status:
+          cols.append('title                                                       ')
+          cols.append('status  ')
+        else:
+          cols.append('title                                                                ')
+        cols.append('date  ')
+        cols.append('priority')
+
+        print colors.colors['blue-on-white'] + \
+              ' '.join(cols) +                 \
+              colors.colors['default']
+
         for t in tickets_to_print:
           print_count += 1
-          print t.oneline()
+          print t.oneline(status=not hide_status, prio=True)
 
         print ''
       else:
