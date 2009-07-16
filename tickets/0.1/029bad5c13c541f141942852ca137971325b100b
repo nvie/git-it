@@ -3,7 +3,7 @@ Issuer: Vincent Driessen <vincent@datafox.nl>
 Date: 2009-05-26 07:46:00
 Type: issue
 Priority: 2
-Status: open
+Status: fixed
 Assigned to: -
 
 In the 'it list -a' overview, we can keep showing the status normally. In case
