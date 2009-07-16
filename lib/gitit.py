@@ -273,7 +273,6 @@ class Gitit:
 
         print ''
       else:
-        #print 'no open tickets for this milestone'
         pass
 
     if print_count == 0:
