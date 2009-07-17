@@ -168,7 +168,7 @@ class Ticket:
 	                  colors.colors['default']))
       elif id == 'status':
         colstrings.append('%s%s%s' % (colors.colors[self.status_colors[self.status]],        \
-                                      misc.chop(self.status, 8),                             \
+                                      misc.pad_to_length(self.status, 8),                             \
 	                  colors.colors['default']))
       elif id == 'priority':
         priostr = self.prio_names[self.prio-1]

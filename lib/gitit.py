@@ -278,7 +278,7 @@ class Gitit:
         # Calculate the real value for the zero-width column
         # Assumption here is that there is only 1 zero-width column
         visible_colwidths = map(lambda c: c['width'], filter(lambda c: c['visible'], cols))
-        total_width = sum(visible_colwidths) + len(visible_colwidths) - 1
+        total_width = sum(visible_colwidths) + len(visible_colwidths)
         for col in cols:
           if col['width'] == 0:
             col['width'] = max(0, width - total_width)
