@@ -7,6 +7,12 @@ def chop(s, maxlen = 20, suffix = ''):
   else:
     return s
 
+def pad_to_length(s, width):
+  if width <= len(s):
+    return s
+  else:
+    return s + ' ' * (width - len(s))
+
 def mkdirs(newdir):
   return os.system('mkdir -p "%s"' % newdir) == 0
 

@@ -148,31 +148,35 @@ class Ticket:
     self.assigned_to = '-'
     self.release = 'uncategorized'
 
-  def oneline(self, status = False, prio = True):
-    date = '%s/%s' % (self.date.month, self.date.day)
-    if status:
-      subject = '%s%-60s%s' % (colors.colors[self.status_colors[self.status]], misc.chop(self.title, 60, '..'), colors.colors['default'])
-    else:
-      subject = '%s%-69s%s' % (colors.colors[self.status_colors[self.status]], misc.chop(self.title, 69, '..'), colors.colors['default'])
-    status_text = '%s%-8s%s' % (colors.colors[self.status_colors[self.status]], misc.chop(self.status, 8), colors.colors['default'])
+  def oneline(self, cols):
+    colstrings = []
+    for col in cols:
+      if not col['visible']:
+        continue
 
-    # Hide the prio field in case of a closed ticket
-    if self.status == 'open':
-      priostr = self.prio_names[self.prio-1]
-      prio_text = '%s%-8s%s' % (colors.colors[self.prio_colors[priostr]], priostr, colors.colors['default'])
-    else:
-      prio_text = '%-8s' % '-'
+      w = col['width']
+      id = col['id']
+      if id == 'id':
+        colstrings.append(misc.chop(self.id, w))
+      elif id == 'type':
+        colstrings.append(misc.pad_to_length(self.type, w))
+      elif id == 'date':
+        colstrings.append(misc.pad_to_length('%s/%s' % (self.date.month, self.date.day), w))
+      elif id == 'title':
+        colstrings.append('%s%s%s' % (colors.colors[self.status_colors[self.status]],        \
+                                      misc.pad_to_length(misc.chop(self.title, w, '..'), w), \
+	                  colors.colors['default']))
+      elif id == 'status':
+        colstrings.append('%s%s%s' % (colors.colors[self.status_colors[self.status]],        \
+                                      misc.chop(self.status, 8),                             \
+	                  colors.colors['default']))
+      elif id == 'priority':
+        priostr = self.prio_names[self.prio-1]
+        colstrings.append('%s%s%s' % (colors.colors[self.prio_colors[priostr]],              \
+                                      priostr,                                               \
+	                  colors.colors['default']))
 
-    cols = [ '%-7s' % misc.chop(self.id, 7),   \
-             '%-7s' % misc.chop(self.type, 7), \
-             subject,                          \
-           ]
-    if status:
-      cols.append(status_text)
-    cols.append('%-6s' % date)
-    if prio:
-      cols.append(prio_text)
-    return ' '.join(cols)
+    return ' '.join(colstrings)
 
   def __str__(self):
     headers = [ 'Subject: %s'     % self.title,

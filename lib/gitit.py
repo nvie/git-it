@@ -223,7 +223,7 @@ class Gitit:
     return '[' + colors.colors['black-on-green'] + format_string_done + \
            colors.colors['default'] + format_string_togo + '] %d%%' % \
            int(percentage_done * 100)
-  
+
   def list(self, show_types = ['open']):
     self.require_itdb()
     releasedirs = filter(lambda x: x[1] == 'tree', git.tree(it.ITDB_BRANCH + \
@@ -231,6 +231,10 @@ class Gitit:
     if len(releasedirs) == 0:
       print 'no tickets yet. use \'it new\' to add new tickets.'
       return
+
+    # Get the available terminal drawing space
+    _, width = os.popen('stty size').read().strip().split()
+    width = int(width)
 
     print_count = 0
     for _, _, sha, rel in releasedirs:
@@ -263,24 +267,35 @@ class Gitit:
 
         # ...and finally, print them
         hide_status = show_types == [ 'open' ]
-        cols = [ 'id     ',                                                      \
-                 'type   ',                                                      \
+        cols = [ { 'id': 'id',       'width': 7, 'visible': True },
+                 { 'id': 'type',     'width': 7, 'visible': True },
+                 { 'id': 'title',    'width': 0, 'visible': True },
+                 { 'id': 'status',   'width': 8, 'visible': not hide_status },
+                 { 'id': 'date',     'width': 6, 'visible': True },
+                 { 'id': 'priority', 'width': 8, 'visible': True },
                ]
-        if not hide_status:
-          cols.append('title                                                       ')
-          cols.append('status  ')
-        else:
-          cols.append('title                                                                ')
-        cols.append('date  ')
-        cols.append('priority')
+
+        # Calculate the real value for the zero-width column
+        # Assumption here is that there is only 1 zero-width column
+        visible_colwidths = map(lambda c: c['width'], filter(lambda c: c['visible'], cols))
+        total_width = sum(visible_colwidths) + len(visible_colwidths) - 1
+        for col in cols:
+          if col['width'] == 0:
+            col['width'] = max(0, width - total_width)
+
+        colstrings = []
+        for col in cols:
+          if not col['visible']:
+            continue
+          colstrings.append(misc.pad_to_length(col['id'], col['width']))
 
         print colors.colors['blue-on-white'] + \
-              ' '.join(cols) +                 \
+              ' '.join(colstrings) +           \
               colors.colors['default']
 
         for t in tickets_to_print:
           print_count += 1
-          print t.oneline(status=not hide_status, prio=True)
+          print t.oneline(cols)
 
         print ''
       else:
