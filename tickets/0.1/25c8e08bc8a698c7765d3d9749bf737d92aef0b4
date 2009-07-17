@@ -3,7 +3,7 @@ Issuer: Vincent Driessen <vincent@datafox.nl>
 Date: 2009-05-19 13:16:14
 Type: feature
 Priority: 3
-Status: open
+Status: fixed
 Assigned to: -
 
 In fact, this can even be dynamically determined.
