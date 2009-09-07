@@ -1,7 +1,17 @@
 import sys, os
 import datetime
-import sha
 import misc, repo, log, ticket, colors, git, it
+
+# Backward-compatible import of SHA1 en MD5 hash algoritms
+try:
+  import hashlib
+  md5_constructor  = hashlib.md5
+  sha1_constructor = hashlib.sha1
+except ImportError:
+  import md5
+  md5_constructor = md5.new
+  import sha
+  sha1_constructor = sha.new
 
 def cmp_by_prio(t1, t2):
   return cmp(t1.prio, t2.prio)
@@ -190,7 +200,7 @@ class Gitit:
       return None
 
     # Generate a SHA1 id
-    s = sha.new()
+    s = sha1_constructor()
     s.update(i.__str__())
     s.update(os.getlogin())
     s.update(datetime.datetime.now().__str__())
