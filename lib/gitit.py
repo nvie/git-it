@@ -234,7 +234,7 @@ class Gitit:
            colors.colors['default'] + format_string_togo + '] %d%%' % \
            int(percentage_done * 100)
 
-  def __print_ticket_rows(self, rel, tickets, show_types):
+  def __print_ticket_rows(self, rel, tickets, show_types, show_progress_bar):
     print_count = 0
     
     # Get the available terminal drawing space
@@ -248,7 +248,7 @@ class Gitit:
                                                      colors.colors['default']
 
     # Show a progress bar only when there are items in this release
-    if total > 0:
+    if total > 0 and show_progress_bar:
       header = release_line + self.progress_bar(done / total)
     else:
       header = release_line
@@ -322,9 +322,9 @@ class Gitit:
       # Store the tickets in the inbox if neccessary
       inbox += filter(lambda t: t.is_mine(), tickets)
       
-      print_count += self.__print_ticket_rows(rel, tickets, show_types)
+      print_count += self.__print_ticket_rows(rel, tickets, show_types, True)
 
-    print_count += self.__print_ticket_rows('INBOX', inbox, show_types)
+    print_count += self.__print_ticket_rows('INBOX', inbox, show_types, False)
 
     if print_count == 0:
       print 'use the -a flag to show all tickets'
