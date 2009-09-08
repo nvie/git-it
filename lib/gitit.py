@@ -234,6 +234,71 @@ class Gitit:
            colors.colors['default'] + format_string_togo + '] %d%%' % \
            int(percentage_done * 100)
 
+  def __print_ticket_rows(self, rel, tickets, show_types):
+    print_count = 0
+    
+    # Get the available terminal drawing space
+    _, width = os.popen('stty size').read().strip().split()
+    width = int(width)
+
+    total = len(filter(lambda x: x.status != 'rejected', tickets)) * 1.0
+    done = len(filter(lambda x: x.status not in ['open', 'rejected'], \
+                                                              tickets)) * 1.0
+    release_line = colors.colors['red-on-white'] + '%-16s' % rel + \
+                                                     colors.colors['default']
+
+    # Show a progress bar only when there are items in this release
+    if total > 0:
+      header = release_line + self.progress_bar(done / total)
+    else:
+      header = release_line
+
+    # First, filter all types that do not need to be shown out of the list
+    tickets_to_print = filter(lambda t: t.status in show_types, tickets)
+    if len(tickets_to_print) > 0:
+      print header
+
+      # Then, sort the tickets by date modified
+      tickets_to_print.sort(cmp_by_prio_then_date)
+
+      # ...and finally, print them
+      hide_status = show_types == [ 'open' ]
+      cols = [ { 'id': 'id',       'width': 7, 'visible': True },
+               { 'id': 'type',     'width': 7, 'visible': True },
+               { 'id': 'title',    'width': 0, 'visible': True },
+               { 'id': 'status',   'width': 8, 'visible': not hide_status },
+               { 'id': 'date',     'width': 6, 'visible': True },
+               { 'id': 'priority', 'width': 8, 'visible': True },
+             ]
+
+      # Calculate the real value for the zero-width column
+      # Assumption here is that there is only 1 zero-width column
+      visible_colwidths = map(lambda c: c['width'], filter(lambda c: c['visible'], cols))
+      total_width = sum(visible_colwidths) + len(visible_colwidths)
+      for col in cols:
+        if col['width'] == 0:
+          col['width'] = max(0, width - total_width)
+
+      colstrings = []
+      for col in cols:
+        if not col['visible']:
+          continue
+        colstrings.append(misc.pad_to_length(col['id'], col['width']))
+
+      print colors.colors['blue-on-white'] + \
+            ' '.join(colstrings) +           \
+            colors.colors['default']
+
+      for t in tickets_to_print:
+        print_count += 1
+        print t.oneline(cols)
+
+      print ''
+    else:
+      pass
+      
+    return print_count
+	
   def list(self, show_types = ['open']):
     self.require_itdb()
     releasedirs = filter(lambda x: x[1] == 'tree', git.tree(it.ITDB_BRANCH + \
@@ -242,9 +307,8 @@ class Gitit:
       print 'no tickets yet. use \'it new\' to add new tickets.'
       return
 
-    # Get the available terminal drawing space
-    _, width = os.popen('stty size').read().strip().split()
-    width = int(width)
+    # Collect tickets assigned to self on the way
+    inbox = []
 
     print_count = 0
     for _, _, sha, rel in releasedirs:
@@ -255,61 +319,12 @@ class Gitit:
                   if type == 'blob' and ticket_id != it.HOLD_FILE \
                 ]
 
-      total = len(filter(lambda x: x.status != 'rejected', tickets)) * 1.0
-      done = len(filter(lambda x: x.status not in ['open', 'rejected'], \
-                                                                tickets)) * 1.0
-      release_line = colors.colors['red-on-white'] + '%-16s' % rel + \
-                                                       colors.colors['default']
+      # Store the tickets in the inbox if neccessary
+      inbox += filter(lambda t: t.is_mine(), tickets)
+      
+      print_count += self.__print_ticket_rows(rel, tickets, show_types)
 
-      # Show a progress bar only when there are items in this release
-      if total > 0:
-        header = release_line + self.progress_bar(done / total)
-      else:
-        header = release_line
-
-      # First, filter all types that do not need to be shown out of the list
-      tickets_to_print = filter(lambda t: t.status in show_types, tickets)
-      if len(tickets_to_print) > 0:
-        print header
-
-        # Then, sort the tickets by date modified
-        tickets_to_print.sort(cmp_by_prio_then_date)
-
-        # ...and finally, print them
-        hide_status = show_types == [ 'open' ]
-        cols = [ { 'id': 'id',       'width': 7, 'visible': True },
-                 { 'id': 'type',     'width': 7, 'visible': True },
-                 { 'id': 'title',    'width': 0, 'visible': True },
-                 { 'id': 'status',   'width': 8, 'visible': not hide_status },
-                 { 'id': 'date',     'width': 6, 'visible': True },
-                 { 'id': 'priority', 'width': 8, 'visible': True },
-               ]
-
-        # Calculate the real value for the zero-width column
-        # Assumption here is that there is only 1 zero-width column
-        visible_colwidths = map(lambda c: c['width'], filter(lambda c: c['visible'], cols))
-        total_width = sum(visible_colwidths) + len(visible_colwidths)
-        for col in cols:
-          if col['width'] == 0:
-            col['width'] = max(0, width - total_width)
-
-        colstrings = []
-        for col in cols:
-          if not col['visible']:
-            continue
-          colstrings.append(misc.pad_to_length(col['id'], col['width']))
-
-        print colors.colors['blue-on-white'] + \
-              ' '.join(colstrings) +           \
-              colors.colors['default']
-
-        for t in tickets_to_print:
-          print_count += 1
-          print t.oneline(cols)
-
-        print ''
-      else:
-        pass
+    print_count += self.__print_ticket_rows('INBOX', inbox, show_types)
 
     if print_count == 0:
       print 'use the -a flag to show all tickets'
@@ -384,4 +399,41 @@ class Gitit:
     print 'ticket \'%s\' reopened' % sha7
     print ''
     self.list()
-  
+
+  def take_ticket(self, sha):
+    i, _, fullsha, match = self.get_ticket(sha)
+    sha7 = misc.chop(sha, 7)
+
+    curr_branch = git.current_branch()
+    git.change_head_branch('git-it')
+    fullname = os.popen('git config user.name').read().strip()
+    msg = 'ticket \'%s\' taken by %s' % (sha7, fullname)
+    i.assigned_to = fullname
+    i.save()
+    git.command_lines('commit', ['-m', msg, match])
+    git.change_head_branch(curr_branch)
+    abs_ticket_dir = os.path.join(repo.find_root(), it.TICKET_DIR)
+    git.command_lines('reset', ['HEAD', abs_ticket_dir])
+    misc.rmdirs(abs_ticket_dir)
+    print 'ticket \'%s\' taken' % sha7
+    print ''
+    self.list()
+
+  def leave_ticket(self, sha):
+    i, _, fullsha, match = self.get_ticket(sha)
+    sha7 = misc.chop(sha, 7)
+
+    curr_branch = git.current_branch()
+    git.change_head_branch('git-it')
+    msg = 'ticket \'%s\' left alone' % sha7
+    i.assigned_to = '-'
+    i.save()
+    git.command_lines('commit', ['-m', msg, match])
+    git.change_head_branch(curr_branch)
+    abs_ticket_dir = os.path.join(repo.find_root(), it.TICKET_DIR)
+    git.command_lines('reset', ['HEAD', abs_ticket_dir])
+    misc.rmdirs(abs_ticket_dir)
+    print 'ticket \'%s\' taken' % sha7
+    print ''
+    self.list()
+

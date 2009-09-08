@@ -55,7 +55,7 @@ if len(params) == 0:
 # Valid subcommand?
 subcmd = params[0]
 del params[0]
-if not subcmd in [ 'init', 'list', 'show', 'new', 'edit', 'mv', 'rm', 'reopen', 'close', 'fix', 'reject' ]:
+if not subcmd in [ 'init', 'list', 'show', 'new', 'edit', 'mv', 'rm', 'reopen', 'close', 'fix', 'reject', 'take', 'leave' ]:
   log.printerr('Unknown subcommand \'%s\'.' % subcmd)
   usage()
   sys.exit(1)
@@ -118,4 +118,14 @@ elif subcmd == 'reopen':
     log.printerr('usage: it reopen <id>')
     sys.exit(1)
   g.reopen_ticket(params[0])
+elif subcmd == 'take':
+  if len(params) != 1:
+    log.printerr('usage: it take <id>')
+    sys.exit(1)
+  g.take_ticket(params[0])
+elif subcmd == 'leave':
+  if len(params) != 1:
+    log.printerr('usage: it leave <id>')
+    sys.exit(1)
+  g.leave_ticket(params[0])
 

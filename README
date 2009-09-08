@@ -25,6 +25,10 @@ Then, typical workflow with git-it is:
 - Add a new ticket:
 	it new
 
+- Take or let go of responsibility for a ticket
+	it take <ticket-id>
+	it leave <ticket-id>
+
 - Close/reopen existing tickets:
 	it fix <ticket-id>
 	it reject <ticket-id>

@@ -148,6 +148,10 @@ class Ticket:
     self.assigned_to = '-'
     self.release = 'uncategorized'
 
+  def is_mine(self):
+    fullname = os.popen('git config user.name').read().strip()
+    return self.assigned_to == fullname
+
   def oneline(self, cols):
     colstrings = []
     for col in cols:
