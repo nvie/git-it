@@ -4,7 +4,7 @@ Date: 2009-05-20 06:59:08
 Type: feature
 Priority: 1
 Status: open
-Assigned to: -
+Assigned to: Vincent Driessen
 
 The sync procedure should be somewhat like the following workflow
 - SYNC_WITH = raw_input('Sync with who? ')
