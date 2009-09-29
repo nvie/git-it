@@ -167,9 +167,15 @@ class Ticket:
       elif id == 'date':
         colstrings.append(misc.pad_to_length('%s/%s' % (self.date.month, self.date.day), w))
       elif id == 'title':
-        colstrings.append('%s%s%s' % (colors.colors[self.status_colors[self.status]],        \
-                                      misc.pad_to_length(misc.chop(self.title, w, '..'), w), \
-	                  colors.colors['default']))
+        if self.assigned_to != '-':
+          name_suffix = ' (%s)' % self.assigned_to
+          w = w - len(name_suffix)
+          colstrings.append('%s%s' % (misc.pad_to_length(misc.chop(self.title, w, '..'), w), \
+                                      name_suffix))
+        else:
+          colstrings.append('%s%s%s' % (colors.colors[self.status_colors[self.status]],        \
+                                        misc.pad_to_length(misc.chop(self.title, w, '..'), w), \
+	                    colors.colors['default']))
       elif id == 'status':
         colstrings.append('%s%s%s' % (colors.colors[self.status_colors[self.status]],        \
                                       misc.pad_to_length(self.status, 8),                             \
