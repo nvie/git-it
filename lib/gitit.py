@@ -234,7 +234,7 @@ class Gitit:
            colors.colors['default'] + format_string_togo + '] %d%%' % \
            int(percentage_done * 100)
 
-  def __print_ticket_rows(self, rel, tickets, show_types, show_progress_bar):
+  def __print_ticket_rows(self, rel, tickets, show_types, show_progress_bar, annotate_ownership):
     print_count = 0
     
     # Get the available terminal drawing space
@@ -291,7 +291,7 @@ class Gitit:
 
       for t in tickets_to_print:
         print_count += 1
-        print t.oneline(cols)
+        print t.oneline(cols, annotate_ownership)
 
       print ''
     else:
@@ -322,9 +322,9 @@ class Gitit:
       # Store the tickets in the inbox if neccessary
       inbox += filter(lambda t: t.is_mine(), tickets)
       
-      print_count += self.__print_ticket_rows(rel, tickets, show_types, True)
+      print_count += self.__print_ticket_rows(rel, tickets, show_types, True, True)
 
-    print_count += self.__print_ticket_rows('INBOX', inbox, show_types, False)
+    print_count += self.__print_ticket_rows('INBOX', inbox, show_types, False, False)
 
     if print_count == 0:
       print 'use the -a flag to show all tickets'

@@ -152,7 +152,7 @@ class Ticket:
     fullname = os.popen('git config user.name').read().strip()
     return self.assigned_to == fullname
 
-  def oneline(self, cols):
+  def oneline(self, cols, annotate_ownership):
     colstrings = []
     for col in cols:
       if not col['visible']:
@@ -167,15 +167,15 @@ class Ticket:
       elif id == 'date':
         colstrings.append(misc.pad_to_length('%s/%s' % (self.date.month, self.date.day), w))
       elif id == 'title':
-        if self.assigned_to != '-':
+        if not annotate_ownership or self.assigned_to == '-':
+          colstrings.append('%s%s%s' % (colors.colors[self.status_colors[self.status]],        \
+                                        misc.pad_to_length(misc.chop(self.title, w, '..'), w), \
+	                    colors.colors['default']))
+        else:
           name_suffix = ' (%s)' % self.assigned_to
           w = w - len(name_suffix)
           colstrings.append('%s%s' % (misc.pad_to_length(misc.chop(self.title, w, '..'), w), \
                                       name_suffix))
-        else:
-          colstrings.append('%s%s%s' % (colors.colors[self.status_colors[self.status]],        \
-                                        misc.pad_to_length(misc.chop(self.title, w, '..'), w), \
-	                    colors.colors['default']))
       elif id == 'status':
         colstrings.append('%s%s%s' % (colors.colors[self.status_colors[self.status]],        \
                                       misc.pad_to_length(self.status, 8),                             \
