@@ -4,7 +4,7 @@ Date: 2009-05-22 07:13:52
 Type: feature
 Priority: 1
 Status: open
-Assigned to: -
+Assigned to: Vincent Driessen
 
 When typing the following text "For example<colon here> do this", it show
 removes the full line, thinking it's another header field
