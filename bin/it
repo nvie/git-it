@@ -77,7 +77,11 @@ elif subcmd == 'list':
   if len(params) > 0:
     if params[0] == '-a':
       types += [ 'closed', 'fixed', 'rejected' ]
-  g.list(types)
+      del params[0]
+  releases = []
+  if len(params) > 0:
+    releases += params
+  g.list(types, releases)
 elif subcmd == 'edit':
   if len(params) != 1:
     log.printerr('usage: it edit <id>')

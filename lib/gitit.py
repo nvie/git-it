@@ -335,10 +335,21 @@ class Gitit:
       
     return print_count
 	
-  def list(self, show_types = ['open']):
+  def list(self, show_types = ['open'], releases_filter = []):
     self.require_itdb()
     releasedirs = filter(lambda x: x[1] == 'tree', git.tree(it.ITDB_BRANCH + \
                                                          ':' + it.TICKET_DIR))
+
+    # Filter releases
+    if releases_filter:
+      filtered = []
+      for dir in releasedirs:
+        _, _, _, name = dir
+        if name in releases_filter:
+          filtered.append(dir)
+      releasedirs = filtered
+
+    # Show message if no tickets there
     if len(releasedirs) == 0:
       print 'no tickets yet. use \'it new\' to add new tickets.'
       return
