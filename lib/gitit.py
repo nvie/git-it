@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, re
 import datetime
 import misc, repo, log, ticket, colors, git, it
 
@@ -30,6 +30,42 @@ def cmp_by_prio_then_date(ticket1, ticket2):
     return cmp_by_date(ticket1, ticket2)
   else:
     return v
+
+def versionCmp(strx, stry):
+  pattern = '^([^0-9]*)([0-9]*)(.*)$'
+  matchx = re.match(pattern, strx)
+  matchy = re.match(pattern, stry)
+  if matchx is None or matchy is None:
+    return 0
+
+  prefixx, valuex, restx = matchx.groups()
+  prefixy, valuey, resty = matchy.groups()
+  if valuex == valuey:
+    if valuex == '':
+      return 0
+    else:
+      return versionCmp(restx, resty)
+
+  # Missing left-hand
+  if valuex == '':
+    return -1
+  elif valuey == '':
+    return 1
+
+  # Compare x to y
+  x = int(valuex)
+  y = int(valuey)
+  return cmp(x, y)
+
+def cmp_by_release_dir(dir1, dir2):
+  _, _, _, title1 = dir1
+  _, _, _, title2 = dir2
+  if title1 == 'uncategorized':
+    return -1
+  elif title2 == 'uncategorized':
+    return 1
+  else:
+    return -versionCmp(title1, title2)
 
 
 class Gitit:
@@ -311,6 +347,7 @@ class Gitit:
     inbox = []
 
     print_count = 0
+    releasedirs.sort(cmp_by_release_dir)
     for _, _, sha, rel in releasedirs:
       reldir = os.path.join(it.TICKET_DIR, rel)
       ticketfiles = git.tree(it.ITDB_BRANCH + ':' + reldir)
