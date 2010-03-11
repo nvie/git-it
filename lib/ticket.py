@@ -20,6 +20,13 @@ def parse_datetime_string(dt):
 def not_empty(s):
   return s.strip() != ''
 
+def is_int(s):
+  try:
+    int(s)
+  except ValueError:
+    return False
+  return True
+
 def ask_for_pattern(message, pattern = None):
   input = raw_input(message)
   if pattern:
@@ -54,6 +61,7 @@ def create_interactive():
     i.prio = 2
   else:
     i.prio = int(prio_string)
+  i.weight = int(ask_for_pattern('Weight [1-27] (1=small,3=minor,9=major,27=super): ', lambda x: is_int(x) and 1 <= int(x) <= 27))
   i.release = ask_for_pattern('Release: ').strip()
   if i.release == '':
     i.release = 'uncategorized'
