@@ -132,8 +132,8 @@ def create_from_file(filename, overwrite_id = None, overwrite_release = None):
 
 class Ticket:
   # Private fields
-  prio_names = [ 'high', 'medium', 'low' ]
-  prio_colors = { 'high': 'red-on-white', 'medium': 'yellow-on-white', 'low': 'white' }
+  prio_names = [ 'high', 'med', 'low' ]
+  prio_colors = { 'high': 'red-on-white', 'med': 'yellow-on-white', 'low': 'white' }
   status_colors = { 'open': 'bold', \
                     'closed': 'default', \
                     'rejected': 'red-on-white', \
@@ -190,10 +190,10 @@ class Ticket:
         colstrings.append('%s%s%s' % (colors.colors[self.status_colors[self.status]],        \
                                       misc.pad_to_length(self.status, 8),                             \
 	                  colors.colors['default']))
-      elif id == 'priority':
+      elif id == 'prio':
         priostr = self.prio_names[self.prio-1]
         colstrings.append('%s%s%s' % (colors.colors[self.prio_colors[priostr]],              \
-                                      priostr,                                               \
+                                      misc.pad_to_length(priostr, 4),
 	                  colors.colors['default']))
       elif id == 'wght':
         weightstr = self.weight_names[min(3, max(0, int(round(math.log(self.weight, 3)))))]
