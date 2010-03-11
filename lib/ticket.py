@@ -182,7 +182,7 @@ class Ticket:
                                         misc.pad_to_length(misc.chop(self.title, w, '..'), w), \
 	                    colors.colors['default']))
         else:
-          name_suffix = ' (%s)' % self.assigned_to
+          name_suffix = ' (%s)' % self.assigned_to.split()[0]
           w = w - len(name_suffix)
           colstrings.append('%s%s' % (misc.pad_to_length(misc.chop(self.title, w, '..'), w), \
                                       name_suffix))
