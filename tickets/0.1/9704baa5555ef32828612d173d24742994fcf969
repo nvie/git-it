@@ -1,0 +1,9 @@
+Subject: When running "it init", also detect already-existing remote branches named <remote>/origin
+Issuer: Vincent Driessen <vincent@datafox.nl>
+Date: 2010-03-11 22:44:41
+Type: issue
+Priority: 2
+Weight: 3
+Status: open
+Assigned to: -
+
