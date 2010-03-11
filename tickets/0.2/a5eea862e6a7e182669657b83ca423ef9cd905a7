@@ -4,7 +4,7 @@ Date: 2009-05-20 10:09:10
 Type: feature
 Priority: 3
 Weight: 6
-Status: open
+Status: fixed
 Assigned to: Vincent Driessen
 
 Every ticket should get a relative weight set (major change, minor change,
