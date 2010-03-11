@@ -3,7 +3,8 @@ Issuer: Vincent Driessen <vincent@datafox.nl>
 Date: 2009-05-22 07:13:52
 Type: feature
 Priority: 1
-Status: open
+Weight: 1
+Status: fixed
 Assigned to: Vincent Driessen
 
 When typing the following text "For example<colon here> do this", it show
