@@ -5,6 +5,6 @@ Type: bug
 Priority: 1
 Weight: 2
 Status: open
-Assigned to: -
+Assigned to: Vincent Driessen
 
 We really should use the absolute path (using repo.find_root()) first.
