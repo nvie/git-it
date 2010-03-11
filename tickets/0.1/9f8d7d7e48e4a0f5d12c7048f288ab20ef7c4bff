@@ -3,10 +3,10 @@ Issuer: Vincent Driessen <vincent@datafox.nl>
 Date: 2009-05-20 06:59:08
 Type: feature
 Priority: 1
+Weight: 6
 Status: open
 Assigned to: -
 
-The sync procedure should be somewhat like the following workflow
 - SYNC_WITH = raw_input('Sync with who? ')
 - git fetch $SYNC_WITH git-it
 - CURR_BRANCH = ?
