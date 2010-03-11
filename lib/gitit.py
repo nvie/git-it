@@ -285,7 +285,7 @@ class Gitit:
     width = int(width)
 
     total = sum([t.weight for t in tickets if t.status != 'rejected']) * 1.0
-    done = sum([t.weight for t in tickets if t.status not in ['open', 'rejected']]) * 1.0
+    done = sum([t.weight for t in tickets if t.status not in ['open', 'rejected', 'review']]) * 1.0
     release_line = colors.colors['red-on-white'] + '%-16s' % rel + \
                                                      colors.colors['default']
 
@@ -342,7 +342,7 @@ class Gitit:
       
     return print_count
 	
-  def list(self, show_types = ['open'], releases_filter = []):
+  def list(self, show_types = ['open', 'review'], releases_filter = []):
     self.require_itdb()
     releasedirs = filter(lambda x: x[1] == 'tree', git.tree(it.ITDB_BRANCH + \
                                                          ':' + it.TICKET_DIR))
@@ -412,7 +412,7 @@ class Gitit:
   def finish_ticket(self, sha, new_status):
     i, _, fullsha, match = self.get_ticket(sha)
     sha7 = misc.chop(fullsha, 7)
-    if i.status != 'open':
+    if i.status not in ['open', 'review']:
       log.printerr('ticket \'%s\' already %s' % (sha7, i.status))
       sys.exit(1)
 

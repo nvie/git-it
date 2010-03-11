@@ -164,6 +164,7 @@ class Ticket:
   prio_names = [ 'high', 'med', 'low' ]
   prio_colors = { 'high': 'red-on-white', 'med': 'yellow-on-white', 'low': 'white' }
   status_colors = { 'open': 'bold', \
+                    'review': 'bold', \
                     'closed': 'default', \
                     'rejected': 'red-on-white', \
                     'fixed': 'green-on-white' }
