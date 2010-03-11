@@ -4,7 +4,7 @@ Date: 2009-05-20 10:09:10
 Type: feature
 Priority: 3
 Status: open
-Assigned to: -
+Assigned to: Vincent Driessen
 
 Every ticket should get a relative weight set (major change, minor change,
 fix). According to this weight, the progress bars can give a more 'realistic'
