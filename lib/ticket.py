@@ -184,7 +184,7 @@ class Ticket:
     self.id = '000000'
     self.status = 'open'
     self.assigned_to = '-'
-    self.weight = 1  # the weight of 'small'
+    self.weight = 3  # the weight of 'minor' by default
     self.release = 'uncategorized'
 
   def is_mine(self):
