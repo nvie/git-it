@@ -277,9 +277,8 @@ class Gitit:
     _, width = os.popen('stty size').read().strip().split()
     width = int(width)
 
-    total = len(filter(lambda x: x.status != 'rejected', tickets)) * 1.0
-    done = len(filter(lambda x: x.status not in ['open', 'rejected'], \
-                                                              tickets)) * 1.0
+    total = sum([t.weight for t in tickets if t.status != 'rejected']) * 1.0
+    done = sum([t.weight for t in tickets if t.status not in ['open', 'rejected']]) * 1.0
     release_line = colors.colors['red-on-white'] + '%-16s' % rel + \
                                                      colors.colors['default']
 
@@ -302,6 +301,7 @@ class Gitit:
       cols = [ { 'id': 'id',       'width': 7, 'visible': True },
                { 'id': 'type',     'width': 7, 'visible': True },
                { 'id': 'title',    'width': 0, 'visible': True },
+               { 'id': 'wght',     'width': 5, 'visible': not hide_status },
                { 'id': 'status',   'width': 8, 'visible': not hide_status },
                { 'id': 'date',     'width': 6, 'visible': True },
                { 'id': 'priority', 'width': 8, 'visible': True },

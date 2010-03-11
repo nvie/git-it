@@ -1,6 +1,7 @@
 import os
 import datetime
 import colors
+import math
 import misc
 import repo
 import log
@@ -87,6 +88,8 @@ def create_from_lines(array_with_lines, id = None, release = None):
   i.date = parse_datetime_string(ticket['Date'])
   i.body = ticket[None]
   i.prio = int(ticket['Priority'])
+  if ticket.has_key('Weight'):  # weight was added later, be backward compatible
+    i.weight = int(ticket['Weight'])
   i.status = ticket['Status']
   i.assigned_to = ticket['Assigned to']
 
@@ -135,6 +138,12 @@ class Ticket:
                     'closed': 'default', \
                     'rejected': 'red-on-white', \
                     'fixed': 'green-on-white' }
+  # weight n will be 3 times as large as weight n-1
+  # so in order to get the real weight from the name:
+  #   weight = 3 ** weight_names.index(name)
+  # and to get the most appropriate name back from a number:
+  #   approx_name = weight_names[min(3,max(0, int(round(math.log(weight, 3)))))]
+  weight_names = [ 'small', 'minor', 'major', 'super' ]
 
   def __init__(self):
     self.title = ''
@@ -146,6 +155,7 @@ class Ticket:
     self.id = '000000'
     self.status = 'open'
     self.assigned_to = '-'
+    self.weight = 1  # the weight of 'small'
     self.release = 'uncategorized'
 
   def is_mine(self):
@@ -185,6 +195,9 @@ class Ticket:
         colstrings.append('%s%s%s' % (colors.colors[self.prio_colors[priostr]],              \
                                       priostr,                                               \
 	                  colors.colors['default']))
+      elif id == 'wght':
+        weightstr = self.weight_names[min(3, max(0, int(round(math.log(self.weight, 3)))))]
+        colstrings.append(misc.pad_to_length(weightstr, 5))
 
     return ' '.join(colstrings)
 
@@ -194,6 +207,7 @@ class Ticket:
                 'Date: %s'        % self.date.strftime(DATE_FORMAT),
                 'Type: %s'        % self.type,
                 'Priority: %d'    % self.prio,
+                'Weight: %d'      % self.weight,
                 'Status: %s'      % self.status,
                 'Assigned to: %s' % self.assigned_to,
                 'Release: %s'     % self.release,
@@ -218,6 +232,7 @@ class Ticket:
     self.print_ticket_field('Date', self.date)
     self.print_ticket_field('Type', self.type)
     self.print_ticket_field('Priority', self.prio)
+    self.print_ticket_field('Weight', self.weight)
     self.print_ticket_field('Status', self.status, None, self.status_colors[self.status])
     self.print_ticket_field('Assigned to', self.assigned_to)
     self.print_ticket_field('Release', self.release)
@@ -234,6 +249,7 @@ class Ticket:
                 'Date: %s'        % self.date.strftime(DATE_FORMAT),
                 'Type: %s'        % self.type,
                 'Priority: %d'    % self.prio,
+                'Weight: %d'      % self.weight,
                 'Status: %s'      % self.status,
                 'Assigned to: %s' % self.assigned_to,
                 '',
