@@ -26,7 +26,8 @@ def tree(branch, recursive = False):
   if recursive:
     opts.append('-r')
   opts.append(branch)
-  raws = command_lines('ls-tree', opts)
+  # apparently, ls-tree MUST be executed from the top-most working tree level
+  raws = command_lines('ls-tree', opts, explicit_git_dir=True)
   objs = []
   for line in raws:
     meta, file = line.split('\t', 1)
@@ -43,8 +44,12 @@ def cat_file(sha):
 def change_head_branch(branch):
   return command_lines('symbolic-ref', ['HEAD', 'refs/heads/%s' % branch])
 
-def command_lines(subcmd, opts = []):
-  cmd = 'git %s %s' % (subcmd, ' '.join(map(quote_string, opts)))
+def command_lines(subcmd, opts = [], explicit_git_dir=False):
+  explicit_git_dir_str = ''
+  if explicit_git_dir:
+    git_dir = command_lines('rev-parse', ['--git-dir'], False)[0]
+    explicit_git_dir_str = '--git-dir=%s ' % git_dir
+  cmd = 'git %s%s %s' % (explicit_git_dir_str, subcmd, ' '.join(map(quote_string, opts)))
   output = os.popen(cmd).read()
   if output.endswith(os.linesep):
     output = output[:-len(os.linesep)]
