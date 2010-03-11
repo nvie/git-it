@@ -155,7 +155,14 @@ class Gitit:
     timestamp2 = os.path.getmtime(it.EDIT_TMP_FILE)
     if success:
       if timestamp1 < timestamp2:
-        i = ticket.create_from_file(it.EDIT_TMP_FILE, fullsha, rel)
+        try:
+          i = ticket.create_from_file(it.EDIT_TMP_FILE, fullsha, rel)
+        except ticket.MalformedTicketFieldException, e:
+          print 'Error parsing ticket: %s' % e
+          sys.exit(1)
+        except ticket.MissingTicketFieldException, e:
+          print 'Error parsing ticket: %s' % e
+          sys.exit(1)
 
         # Now, when the edit has succesfully taken place, switch branches, commit,
         # and switch back
@@ -362,7 +369,7 @@ class Gitit:
     for _, _, sha, rel in releasedirs:
       reldir = os.path.join(it.TICKET_DIR, rel)
       ticketfiles = git.tree(it.ITDB_BRANCH + ':' + reldir)
-      tickets = [ ticket.create_from_lines(git.cat_file(sha), ticket_id, rel) \
+      tickets = [ ticket.create_from_lines(git.cat_file(sha), ticket_id, rel, True) \
                   for _, type, sha, ticket_id in ticketfiles \
                   if type == 'blob' and ticket_id != it.HOLD_FILE \
                 ]
@@ -399,7 +406,7 @@ class Gitit:
     parent, fullsha = os.path.split(match)
     rel = os.path.basename(parent)
     sha7 = misc.chop(fullsha, 7)
-    i = ticket.create_from_lines(contents, fullsha, rel)
+    i = ticket.create_from_lines(contents, fullsha, rel, True)
     return (i, rel, fullsha, match)
   
   def finish_ticket(self, sha, new_status):

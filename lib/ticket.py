@@ -9,6 +9,9 @@ import it
 
 DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 
+class MissingTicketFieldException(Exception): pass
+class MalformedTicketFieldException(Exception): pass
+
 def parse_datetime_string(dt):
 	dt = dt.strip()
 	date, time = dt.split(' ')
@@ -71,30 +74,48 @@ def create_interactive():
   i.issuer = '%s <%s>' % (fullname, email)
   return i
 
-def create_from_lines(array_with_lines, id = None, release = None):
+def create_from_lines(array_with_lines, id = None, release = None, backward_compatible = False):
   # Create an empty ticket
   i = Ticket()
 
   # Parse the lines
   ticket = {}
   ticket[None] = ''
+  in_body = False
   for line in array_with_lines:
-    if line.strip() == '' or line[0] == '#':
+    # skip comment lines
+    if line.startswith('#'):
       continue
-    pos = line.find(':')
-    if pos >= 0:
-      key = line[:pos].strip()
-      val = line[pos+1:].strip()
-      ticket[key] = val
-    else:
+    
+    # when we're in the body, just append lines
+    if in_body or line.strip() == '':
+      in_body = True
       ticket[None] += line + os.linesep
+      continue
+    
+    pos = line.find(':')
+    if pos < 0:
+      raise MalformedTicketFieldException, 'Cannot parse field "%s".' % line
+    
+    key = line[:pos].strip()
+    val = line[pos+1:].strip()
+    ticket[key] = val
+
+  # Validate if all fields are present
+  requires_fields_set = ['Subject', 'Type', 'Issuer', 'Date', 'Priority',
+	     'Status', 'Assigned to']
+  if not backward_compatible:
+    requires_fields_set.append('Weight')
+  for required_field in requires_fields_set:
+    if not ticket.has_key(required_field):
+      raise MissingTicketFieldException, 'Ticket misses field "%s". Parsed so far: %s' % (required_field, ticket)
 
   # Now, set the ticket fields
   i.title = ticket['Subject']
   i.type = ticket['Type']
   i.issuer = ticket['Issuer']
   i.date = parse_datetime_string(ticket['Date'])
-  i.body = ticket[None]
+  i.body = ticket[None].strip()
   i.prio = int(ticket['Priority'])
   if ticket.has_key('Weight'):  # weight was added later, be backward compatible
     i.weight = int(ticket['Weight'])
@@ -112,9 +133,9 @@ def create_from_lines(array_with_lines, id = None, release = None):
   # Return the new ticket
   return i
 
-def create_from_string(content, id = None, release = None):
+def create_from_string(content, id = None, release = None, backward_compatible = False):
   lines = content.split(os.linesep)
-  return create_from_lines(lines, id, release)
+  return create_from_lines(lines, id, release, backward_compatible)
 
 def create_from_file(filename, overwrite_id = None, overwrite_release = None):
   if (overwrite_id and not overwrite_release) or (overwrite_release and not overwrite_id):
