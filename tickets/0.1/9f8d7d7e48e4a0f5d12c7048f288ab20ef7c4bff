@@ -4,7 +4,7 @@ Date: 2009-05-20 06:59:08
 Type: feature
 Priority: 1
 Weight: 6
-Status: open
+Status: fixed
 Assigned to: -
 
 - SYNC_WITH = raw_input('Sync with who? ')
