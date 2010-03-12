@@ -231,6 +231,22 @@ class Gitit:
     i, _, fullsha, _ = self.get_ticket(sha)
     i.print_ticket(fullsha)
   
+  def sync(self):
+    # check whether this working tree has unstaged/uncommitted changes
+    # in order to prevent data loss from happening
+    if git.has_unstaged_changes():
+      print 'current working tree has unstaged changes. aborting.'
+      sys.exit(1)
+    if git.has_uncommitted_changes():
+      print 'current working tree has uncommitted changes. aborting.'
+      sys.exit(1)
+
+    # now we may sync the git-it branch safely!
+    curr = git.current_branch()
+    os.system('git checkout git-it')
+    os.system('git pull')
+    os.system('git checkout \'%s\'' % curr)
+  
   def new(self):
     self.require_itdb()
 
@@ -491,4 +507,5 @@ class Gitit:
     print 'ticket \'%s\' taken' % sha7
     print ''
     self.list()
+  
 

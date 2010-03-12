@@ -16,8 +16,8 @@ Typical commands to get started with git-it is:
 	git co -b git-it origin/git-it
 
 Then, typical workflow with git-it is:
-- Fetch and push changes to sync with upstream:
-	it sync 	(not yet implemented!)
+- Retrieve all remote ticket changes:
+	it sync
 
 - List all tickets:
 	it list
@@ -35,6 +35,9 @@ Then, typical workflow with git-it is:
 	it fix <ticket-id>
 	it reject <ticket-id>
 	it reopen <ticket-id>
+
+- Finally, push out all of your changes to the central repo:
+	git push
 
 Authors:
 Vincent Driessen <vincent@datafox.nl>

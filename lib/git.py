@@ -55,5 +55,29 @@ def command_lines(subcmd, opts = [], explicit_git_dir=False):
     output = output[:-len(os.linesep)]
   return output.split(os.linesep)
 
+def command_exitcode_only(subcmd, opts = [], explicit_git_dir=False):
+  explicit_git_dir_str = ''
+  if explicit_git_dir:
+    git_dir = command_lines('rev-parse', ['--git-dir'], False)[0]
+    explicit_git_dir_str = '--git-dir=%s ' % git_dir
+  cmd = 'git %s%s %s' % (explicit_git_dir_str, subcmd, ' '.join(map(quote_string, opts)))
+  p = os.popen(cmd)
+  exitcode = p.close()
+  if exitcode is None:
+    exitcode = 0
+  return exitcode
+
+def has_unstaged_changes():
+  exitcode = command_exitcode_only( \
+    'diff',  \
+    ['--no-ext-diff','--ignore-submodules','--quiet','--exit-code'])
+  return exitcode != 0
+
+def has_uncommitted_changes():
+  exitcode = command_exitcode_only( \
+    'diff-index',  \
+    ['--cached','--quiet','--ignore-submodules','HEAD','--'])
+  return exitcode != 0
+
 if __name__ == '__main__':
   print full_tree(current_branch())
