@@ -21,7 +21,7 @@ def usage():
   print '  edit      Edits an existing issue.'
   print '  rm -f     Removes an existing ticket.'
   print '  mv        Moves the given ticket to a release.'
-  print '  sync      Syncs changes to the ticket DB to a remote repo.'
+  print '  sync      Retrieves all remote ticket changes.'
   print ''
   print 'Taking responsibility:'
   print '  take      Take responsibility for this ticket and put it'
