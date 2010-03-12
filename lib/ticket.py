@@ -270,7 +270,7 @@ class Ticket:
     print self.body
 
   def filename(self):
-    file = os.path.join(it.TICKET_DIR, self.release, self.id)
+    file = os.path.join(repo.find_root(), it.TICKET_DIR, self.release, self.id)
     return file
 
   def save(self, file = None):
