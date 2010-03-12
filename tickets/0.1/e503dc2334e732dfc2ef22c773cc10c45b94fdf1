@@ -1,0 +1,9 @@
+Subject: Creating tickets from a subdirectory incorrectly puts tickets in <subdir>/tickets/ instead of tickets/
+Issuer: Vincent Driessen <vincent@datafox.nl>
+Date: 2010-03-12 11:39:08
+Type: bug
+Priority: 1
+Weight: 2
+Status: open
+Assigned to: -
+
