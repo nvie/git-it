@@ -240,7 +240,12 @@ class Gitit:
     if git.has_uncommitted_changes():
       print 'current working tree has uncommitted changes. aborting.'
       sys.exit(1)
-    print 'TODO: implement'
+
+    # now we may sync the git-it branch safely!
+    curr = git.current_branch()
+    os.system('git checkout git-it')
+    os.system('git pull')
+    os.system('git checkout \'%s\'' % curr)
   
   def new(self):
     self.require_itdb()
