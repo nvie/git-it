@@ -1,4 +1,4 @@
-Subject: Taking tickets when the current working dir is not the root yields an error
+Subject: Modifying tickets when the current working dir is not the root incorrectly removes the ticket!
 Issuer: Vincent Driessen <vincent@datafox.nl>
 Date: 2010-03-12 11:52:18
 Type: bug
@@ -7,3 +7,18 @@ Weight: 3
 Status: open
 Assigned to: Vincent Driessen
 
+When issuing a ticket modification command (i.e. fixing/reopening/taking) from
+inside a subdirectory of the working tree's root, the ticket is removed from
+the git-it DB altogether!
+
+For example:
+
+  $ it list
+  0123456 Some ticket
+
+  $ cd subdir
+  $ it fix 0123456
+  ticket '0123456' fixed
+
+  $ it list -a
+  (no more ticket named 0123456)
