@@ -439,7 +439,7 @@ class Gitit:
     i.status = new_status
     msg = '%s ticket \'%s\'' % (i.status, sha7)
     i.save()
-    git.command_lines('commit', ['-m', msg, match])
+    git.command_lines('commit', ['-m', msg, match], explicit_git_dir=True)
     git.change_head_branch(curr_branch)
     abs_ticket_dir = os.path.join(repo.find_root(), it.TICKET_DIR)
     git.command_lines('reset', ['HEAD', abs_ticket_dir])
@@ -462,7 +462,7 @@ class Gitit:
     msg = 'ticket \'%s\' reopened' % sha7
     i.status = 'open'
     i.save()
-    git.command_lines('commit', ['-m', msg, match])
+    git.command_lines('commit', ['-m', msg, match], explicit_git_dir=True)
     git.change_head_branch(curr_branch)
     abs_ticket_dir = os.path.join(repo.find_root(), it.TICKET_DIR)
     git.command_lines('reset', ['HEAD', abs_ticket_dir])
@@ -481,7 +481,7 @@ class Gitit:
     msg = 'ticket \'%s\' taken by %s' % (sha7, fullname)
     i.assigned_to = fullname
     i.save()
-    git.command_lines('commit', ['-m', msg, match])
+    git.command_lines('commit', ['-m', msg, match], explicit_git_dir=True)
     git.change_head_branch(curr_branch)
     abs_ticket_dir = os.path.join(repo.find_root(), it.TICKET_DIR)
     git.command_lines('reset', ['HEAD', abs_ticket_dir])
@@ -499,7 +499,7 @@ class Gitit:
     msg = 'ticket \'%s\' left alone' % sha7
     i.assigned_to = '-'
     i.save()
-    git.command_lines('commit', ['-m', msg, match])
+    git.command_lines('commit', ['-m', msg, match], explicit_git_dir=True)
     git.change_head_branch(curr_branch)
     abs_ticket_dir = os.path.join(repo.find_root(), it.TICKET_DIR)
     git.command_lines('reset', ['HEAD', abs_ticket_dir])
