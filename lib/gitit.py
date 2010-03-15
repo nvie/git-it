@@ -395,7 +395,7 @@ class Gitit:
       
       print_count += self.__print_ticket_rows(rel, tickets, show_types, True, True)
 
-    print_count += self.__print_ticket_rows('INBOX', inbox, show_types, False, False)
+    print_count += self.__print_ticket_rows('INBOX', inbox, (show_types == ['open','review']) and ['open'] or show_types, False, False)
 
     if print_count == 0:
       print 'use the -a flag to show all tickets'
