@@ -208,7 +208,7 @@ class Ticket:
         colstrings.append(misc.pad_to_length('%s/%s' % (self.date.month, self.date.day), w))
       elif id == 'title':
         title = self.title
-        if self.assigned_to != '-':
+        if self.assigned_to != '-' and annotate_ownership:
           name_suffix = ' (%s)' % self.assigned_to.split()[0]
           w = w - len(name_suffix)
           title = '%s%s' % (misc.pad_to_length(misc.chop(title, w, '..'), w), name_suffix)
