@@ -2,6 +2,7 @@
 # Python Git library
 #
 import os
+import repo
 
 def quote_string(s):
   s = s.replace('\"', '\\\"')
@@ -27,7 +28,7 @@ def tree(branch, recursive = False):
     opts.append('-r')
   opts.append(branch)
   # apparently, ls-tree MUST be executed from the top-most working tree level
-  raws = command_lines('ls-tree', opts, explicit_git_dir=True)
+  raws = command_lines('ls-tree', opts, from_root=False, explicit_git_dir=True)
   objs = []
   for line in raws:
     meta, file = line.split('\t', 1)
@@ -44,25 +45,35 @@ def cat_file(sha):
 def change_head_branch(branch):
   return command_lines('symbolic-ref', ['HEAD', 'refs/heads/%s' % branch])
 
-def command_lines(subcmd, opts = [], explicit_git_dir=False):
+def command_lines(subcmd, opts = [], from_root=False, explicit_git_dir=False):
   explicit_git_dir_str = ''
   if explicit_git_dir:
     git_dir = command_lines('rev-parse', ['--git-dir'], False)[0]
     explicit_git_dir_str = '--git-dir=%s ' % git_dir
+  if from_root:
+    cwd = os.getcwd()
+    os.chdir(repo.find_root())
   cmd = 'git %s%s %s' % (explicit_git_dir_str, subcmd, ' '.join(map(quote_string, opts)))
   output = os.popen(cmd).read()
+  if from_root:
+    os.chdir(cwd)
   if output.endswith(os.linesep):
     output = output[:-len(os.linesep)]
   return output.split(os.linesep)
 
-def command_exitcode_only(subcmd, opts = [], explicit_git_dir=False):
+def command_exitcode_only(subcmd, opts = [], from_root=False, explicit_git_dir=False):
   explicit_git_dir_str = ''
   if explicit_git_dir:
     git_dir = command_lines('rev-parse', ['--git-dir'], False)[0]
     explicit_git_dir_str = '--git-dir=%s ' % git_dir
+  if from_root:
+    cwd = os.getcwd()
+    os.chdir(repo.find_root())
   cmd = 'git %s%s %s' % (explicit_git_dir_str, subcmd, ' '.join(map(quote_string, opts)))
   p = os.popen(cmd)
   exitcode = p.close()
+  if from_root:
+    os.chdir(cwd)
   if exitcode is None:
     exitcode = 0
   return exitcode
