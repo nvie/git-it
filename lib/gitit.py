@@ -176,8 +176,6 @@ class Gitit:
         git.command_lines('reset', ['HEAD', abs_ticket_dir])
         misc.rmdirs(abs_ticket_dir)
         print 'ticket \'%s\' edited succesfully' % sha7
-        print ''
-        self.list()
       else:
         print 'editing of ticket \'%s\' cancelled' % sha7
     else:
@@ -221,8 +219,6 @@ class Gitit:
       misc.rmdirs(abs_ticket_dir)
 
       print 'ticket \'%s\' moved to release \'%s\'' % (sha7, to_rel)
-      print ''
-      self.list()
     except OSError, e:
       log.printerr('could not move ticket \'%s\' to \'%s\':' % (sha7, to_rel))
       log.printerr(e)
@@ -447,8 +443,6 @@ class Gitit:
     git.command_lines('reset', ['HEAD', abs_ticket_dir])
     misc.rmdirs(abs_ticket_dir)
     print 'ticket \'%s\' %s' % (sha7, new_status)
-    print ''
-    self.list()
   
   def reopen_ticket(self, sha):
     i, _, fullsha, match = self.get_ticket(sha)
@@ -470,8 +464,6 @@ class Gitit:
     git.command_lines('reset', ['HEAD', abs_ticket_dir])
     misc.rmdirs(abs_ticket_dir)
     print 'ticket \'%s\' reopened' % sha7
-    print ''
-    self.list()
 
   def take_ticket(self, sha):
     i, _, fullsha, match = self.get_ticket(sha)
@@ -489,8 +481,6 @@ class Gitit:
     git.command_lines('reset', ['HEAD', abs_ticket_dir])
     misc.rmdirs(abs_ticket_dir)
     print 'ticket \'%s\' taken' % sha7
-    print ''
-    self.list()
 
   def leave_ticket(self, sha):
     i, _, fullsha, match = self.get_ticket(sha)
@@ -507,7 +497,5 @@ class Gitit:
     git.command_lines('reset', ['HEAD', abs_ticket_dir])
     misc.rmdirs(abs_ticket_dir)
     print 'ticket \'%s\' taken' % sha7
-    print ''
-    self.list()
   
 
