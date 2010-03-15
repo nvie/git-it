@@ -207,15 +207,16 @@ class Ticket:
       elif id == 'date':
         colstrings.append(misc.pad_to_length('%s/%s' % (self.date.month, self.date.day), w))
       elif id == 'title':
-        if not annotate_ownership or self.assigned_to == '-':
-          colstrings.append('%s%s%s' % (colors.colors[self.status_colors[self.status]],        \
-                                        misc.pad_to_length(misc.chop(self.title, w, '..'), w), \
-	                    colors.colors['default']))
-        else:
+        title = self.title
+        if self.assigned_to != '-':
           name_suffix = ' (%s)' % self.assigned_to.split()[0]
           w = w - len(name_suffix)
-          colstrings.append('%s%s' % (misc.pad_to_length(misc.chop(self.title, w, '..'), w), \
-                                      name_suffix))
+          title = '%s%s' % (misc.pad_to_length(misc.chop(title, w, '..'), w), name_suffix)
+        else:
+          title = misc.pad_to_length(misc.chop(title, w, '..'), w)
+        colstrings.append('%s%s%s' % (colors.colors[self.status_colors[self.status]],        \
+                                      title, \
+                                      colors.colors['default']))
       elif id == 'status':
         colstrings.append('%s%s%s' % (colors.colors[self.status_colors[self.status]],        \
                                       misc.pad_to_length(self.status, 8),                             \
