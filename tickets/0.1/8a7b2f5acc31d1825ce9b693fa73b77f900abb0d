@@ -4,7 +4,7 @@ Date: 2010-03-12 11:52:18
 Type: bug
 Priority: 1
 Weight: 3
-Status: open
+Status: fixed
 Assigned to: Vincent Driessen
 
 When issuing a ticket modification command (i.e. fixing/reopening/taking) from
