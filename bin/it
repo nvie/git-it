@@ -30,7 +30,7 @@ def usage():
   print '            it from your INBOX.'
   print ''
   print 'Changing status:'
-  print '  review    Mark a ticket as in-review.'
+  print '  test      Mark a ticket as to-test.'
   print '  close     Mark a ticket as closed.'
   print '  fix       Mark a ticket as fixed.'
   print '  reject    Mark a ticket as rejected.'
@@ -63,7 +63,7 @@ if len(params) == 0:
 # Valid subcommand?
 subcmd = params[0]
 del params[0]
-if not subcmd in [ 'init', 'list', 'show', 'new', 'edit', 'mv', 'rm', 'reopen', 'close', 'fix', 'reject', 'review', 'take', 'leave', 'sync' ]:
+if not subcmd in [ 'init', 'list', 'show', 'new', 'edit', 'mv', 'rm', 'reopen', 'close', 'fix', 'reject', 'test', 'take', 'leave', 'sync' ]:
   log.printerr('Unknown subcommand \'%s\'.' % subcmd)
   usage()
   sys.exit(1)
@@ -75,7 +75,7 @@ if subcmd == 'init':
 elif subcmd == 'new':
   g.new()
 elif subcmd == 'list':
-  types = ['open', 'review']
+  types = ['open', 'test']
   if len(params) > 0:
     if params[0] == '-a':
       types += [ 'closed', 'fixed', 'rejected' ]
@@ -125,11 +125,11 @@ elif subcmd == 'reject':
     log.printerr('usage: it close <id>')
     sys.exit(1)
   g.finish_ticket(params[0], 'rejected')
-elif subcmd == 'review':
+elif subcmd == 'test':
   if len(params) != 1:
-    log.printerr('usage: it review <id>')
+    log.printerr('usage: it test <id>')
     sys.exit(1)
-  g.finish_ticket(params[0], 'review')
+  g.finish_ticket(params[0], 'test')
 elif subcmd == 'reopen':
   if len(params) != 1:
     log.printerr('usage: it reopen <id>')

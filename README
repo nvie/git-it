@@ -30,7 +30,7 @@ Then, typical workflow with git-it is:
 	it leave <ticket-id>
 
 - Close/reopen existing tickets:
-	it review <ticket-id>
+	it test <ticket-id>
 	it close <ticket-id>
 	it fix <ticket-id>
 	it reject <ticket-id>

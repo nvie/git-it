@@ -297,7 +297,7 @@ class Gitit:
     width = int(width)
 
     total = sum([t.weight for t in tickets if t.status != 'rejected']) * 1.0
-    done = sum([t.weight for t in tickets if t.status not in ['open', 'rejected', 'review']]) * 1.0
+    done = sum([t.weight for t in tickets if t.status not in ['open', 'rejected', 'test']]) * 1.0
     release_line = colors.colors['red-on-white'] + '%-16s' % rel + \
                                                      colors.colors['default']
 
@@ -354,7 +354,7 @@ class Gitit:
       
     return print_count
 	
-  def list(self, show_types = ['open', 'review'], releases_filter = []):
+  def list(self, show_types = ['open', 'test'], releases_filter = []):
     self.require_itdb()
     releasedirs = filter(lambda x: x[1] == 'tree', git.tree(it.ITDB_BRANCH + \
                                                          ':' + it.TICKET_DIR))
@@ -391,7 +391,7 @@ class Gitit:
       
       print_count += self.__print_ticket_rows(rel, tickets, show_types, True, True)
 
-    print_count += self.__print_ticket_rows('INBOX', inbox, (show_types == ['open','review']) and ['open'] or show_types, False, False)
+    print_count += self.__print_ticket_rows('INBOX', inbox, (show_types == ['open','test']) and ['open'] or show_types, False, False)
 
     if print_count == 0:
       print 'use the -a flag to show all tickets'
@@ -426,7 +426,7 @@ class Gitit:
   def finish_ticket(self, sha, new_status):
     i, _, fullsha, match = self.get_ticket(sha)
     sha7 = misc.chop(fullsha, 7)
-    if i.status not in ['open', 'review']:
+    if i.status not in ['open', 'test']:
       log.printerr('ticket \'%s\' already %s' % (sha7, i.status))
       sys.exit(1)
 
