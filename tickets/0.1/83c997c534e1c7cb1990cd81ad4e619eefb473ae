@@ -1,0 +1,9 @@
+Subject: Rename 'review' status to 'test', since it is used for marking tickets to-test
+Issuer: Vincent Driessen <vincent@datafox.nl>
+Date: 2010-03-24 14:12:01
+Type: issue
+Priority: 2
+Weight: 3
+Status: open
+Assigned to: -
+
